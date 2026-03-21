@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Droplets, Recycle, Search, Wind, X } from "lucide-react"
-import { normalizeText, regionCatalog } from "./../../data/region-catalog"
+import { normalizeText, regionCatalog,  } from "./../../data/region-catalog"
 
 export default function RegionSearch() {
     const router = useRouter()
@@ -18,7 +18,7 @@ export default function RegionSearch() {
         const normalizedQuery = normalizeText(query)
 
         if (!normalizedQuery) {
-            return regionCatalog.slice(0, 12)
+            return regionCatalog
         }
 
         return regionCatalog.filter((region) =>
@@ -69,7 +69,7 @@ export default function RegionSearch() {
             return
         }
 
-        router.push(`/services/results?region=${encodeURIComponent(finalRegion.label)}`)
+        router.push(`/services/${finalRegion.slug}`)
     }
 
     return (

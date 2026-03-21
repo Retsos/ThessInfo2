@@ -11,6 +11,7 @@ type LegacyRegion = {
 }
 
 export type RegionCatalogItem = {
+    slug: string
     label: string
     searchValue: string
     keys: {
@@ -25,6 +26,16 @@ export type RegionCatalogItem = {
     }
 }
 
+function slugifyGreek(value: string) {
+    return value
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9\u0370-\u03ff\s-]/g, "")
+        .trim()
+        .replace(/\s+/g, "-")
+}
+
 function isRealKey(value?: string | null) {
     return Boolean(value && value.trim() !== "" && value !== "a")
 }
@@ -36,6 +47,7 @@ export const regionCatalog: RegionCatalogItem[] = (legacyRegions as LegacyRegion
         const airKey = isRealKey(region.airName) ? region.airName!.trim() : null
 
         return {
+            slug: slugifyGreek(region.label),
             label: region.label,
             searchValue: region.label,
             keys: {
@@ -54,6 +66,10 @@ export const regionCatalog: RegionCatalogItem[] = (legacyRegions as LegacyRegion
 
 export function getRegionByLabel(label: string) {
     return regionCatalog.find((region) => region.label === label) ?? null
+}
+
+export function getRegionBySlug(slug: string) {
+    return regionCatalog.find((region) => region.slug === slug) ?? null
 }
 
 export function normalizeText(value: string) {
