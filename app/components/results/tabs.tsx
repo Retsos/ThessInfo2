@@ -58,10 +58,10 @@ export default function ResultsTabs({
                         type="button"
                         onClick={() => onTabChange(tab)}
                         className={[
-                            "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all",
+                            "inline-flex items-center cursor-pointer gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all",
                             isActive
                                 ? meta.activeClass
-                                : "border-[#d7eff0] bg-white text-[#1a535c]/75 hover:bg-[#f7fcfc]",
+                                : "border-[#d7eff0] bg-white text-[#1a535c]/75 hover:bg-[#E2F1F1]",
                         ].join(" ")}
                     >
                         <Icon className="h-4 w-4" />

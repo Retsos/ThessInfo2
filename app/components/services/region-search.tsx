@@ -158,7 +158,7 @@ export default function RegionSearch({
                                                 key={region.label}
                                                 type="button"
                                                 onClick={() => handleSelect(region.label)}
-                                                className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left transition-colors hover:bg-[#f1fafa]"
+                                                className="flex cursor-pointer w-full items-center justify-between rounded-xl px-3 py-3 text-left transition-colors hover:bg-[#f1fafa]"
                                             >
                                                 <span className="text-sm font-medium text-[#1a535c]">
                                                     {region.label}
@@ -203,9 +203,6 @@ export default function RegionSearch({
                             )}
                         </div>
 
-                        {warning && (
-                            <p className="mt-2 text-sm font-medium text-red-600">{warning}</p>
-                        )}
                     </div>
 
                     <button
@@ -216,6 +213,10 @@ export default function RegionSearch({
                         {buttonText}
                     </button>
                 </div>
+
+                {warning && (
+                    <p className="mt-2 text-sm font-medium text-red-600">{warning}</p>
+                )}
 
                 {!compact && (
                     <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-[#1a535c]/75">

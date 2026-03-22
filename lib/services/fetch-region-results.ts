@@ -4,6 +4,7 @@ import type {
     WaterLatestResponse,
     WaterYearlyResponse,
 } from "../../app/components/results/water/water-types"
+import type { AirDataResponse } from "../../app/components/results/air/air-types"
 
 export type RegionResultsData = {
     water: {
@@ -16,8 +17,8 @@ export type RegionResultsData = {
         usableGeneral: unknown | null
     }
     air: {
-        latest: unknown | null
-        yearly: unknown | null
+        latest: AirDataResponse | null
+        yearly: AirDataResponse | null
     }
 }
 
@@ -103,11 +104,11 @@ export async function fetchRegionResults(
         air: {
             latest:
                 results[0].status === "fulfilled" && results[0].value
-                    ? (results[0].value as { data: unknown }).data
+                    ? (results[0].value as { data: AirDataResponse }).data
                     : null,
             yearly:
                 results[1].status === "fulfilled" && results[1].value
-                    ? (results[1].value as { data: unknown }).data
+                    ? (results[1].value as { data: AirDataResponse }).data
                     : null,
         },
     }
