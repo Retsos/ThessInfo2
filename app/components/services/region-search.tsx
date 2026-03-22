@@ -3,16 +3,32 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Droplets, Recycle, Search, Wind, X } from "lucide-react"
-import { normalizeText, regionCatalog,  } from "./../../data/region-catalog"
+import { normalizeText, regionCatalog } from "../../data/region-catalog"
 
-export default function RegionSearch() {
+type RegionSearchProps = {
+    compact?: boolean
+    initialRegionLabel?: string
+}
+
+export default function RegionSearch({
+    compact = false,
+    initialRegionLabel,
+}: RegionSearchProps) {
     const router = useRouter()
     const wrapperRef = useRef<HTMLDivElement | null>(null)
 
-    const [query, setQuery] = useState("")
+    const [query, setQuery] = useState(initialRegionLabel ?? "")
     const [isOpen, setIsOpen] = useState(false)
-    const [selectedLabel, setSelectedLabel] = useState<string | null>(null)
+    const [selectedLabel, setSelectedLabel] = useState<string | null>(
+        initialRegionLabel ?? null
+    )
     const [warning, setWarning] = useState("")
+
+    useEffect(() => {
+        setQuery(initialRegionLabel ?? "")
+        setSelectedLabel(initialRegionLabel ?? null)
+        setWarning("")
+    }, [initialRegionLabel])
 
     const filteredRegions = useMemo(() => {
         const normalizedQuery = normalizeText(query)
@@ -72,17 +88,35 @@ export default function RegionSearch() {
         router.push(`/services/${finalRegion.slug}`)
     }
 
+    const rootClass = compact
+        ? "rounded-[1.45rem] border border-[#d7eff0] bg-white p-4 shadow-sm"
+        : "rounded-[1.7rem] border border-[#d7eff0] bg-white shadow-[0_22px_55px_rgba(29,170,173,0.12)]"
+
+    const bodyClass = compact ? "" : "p-5 md:p-6"
+    const inputHeightClass = compact ? "min-h-12" : "min-h-14"
+    const buttonHeightClass = compact ? "h-12" : "h-14"
+    const buttonText = compact ? "Μετάβαση" : "Αναζήτηση"
+    const placeholderText = compact
+        ? "Διάλεξε άλλη περιοχή"
+        : "Αναζήτηση Δήμου/Περιοχής"
+
     return (
-        <div className=" rounded-[1.7rem] border border-[#d7eff0] bg-white shadow-[0_22px_55px_rgba(29,170,173,0.12)]">
-            <div className="p-5 md:p-6">
+        <div className={rootClass}>
+            {!compact && (
+                <div className="h-1.5 w-full bg-[linear-gradient(90deg,#2c999b_0%,#1daaad_50%,#006264_100%)]" />
+            )}
+
+            <div className={bodyClass}>
                 <div className="flex flex-col gap-4 md:flex-row md:items-end">
                     <div className="flex-1" ref={wrapperRef}>
                         <label className="mb-2 block text-sm font-semibold text-[#1a535c]">
-                            Αναζήτηση Δήμου ή Περιοχής
+                            {compact ? "Αλλαγή περιοχής" : "Αναζήτηση Δήμου ή Περιοχής"}
                         </label>
 
                         <div className="relative">
-                            <div className="flex min-h-14 items-center rounded-2xl border border-[#cfe9ea] bg-[#fbffff] px-4 shadow-sm transition-colors focus-within:border-[#1daaad]">
+                            <div
+                                className={`flex ${inputHeightClass} items-center rounded-2xl border border-[#cfe9ea] bg-[#fbffff] px-4 shadow-sm transition-colors focus-within:border-[#1daaad]`}
+                            >
                                 <Search className="mr-3 h-5 w-5 text-[#1daaad]" />
 
                                 <input
@@ -100,7 +134,7 @@ export default function RegionSearch() {
                                             handleSearch()
                                         }
                                     }}
-                                    placeholder="Αναζήτηση Δήμου/Περιοχής"
+                                    placeholder={placeholderText}
                                     className="w-full bg-transparent text-sm text-[#1a535c] outline-none placeholder:text-[#1a535c]/45"
                                 />
 
@@ -117,53 +151,54 @@ export default function RegionSearch() {
                             </div>
 
                             {isOpen && (
-                                <div className="absolute left-0 right-0 top-[calc(100%+0.55rem)] z-[100] max-h-80 overflow-auto rounded-2xl border border-[#d7eff0] bg-white p-2 shadow-[0_18px_45px_rgba(29,170,173,0.14)] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#cfe9ea] [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#1daaad]">                                    {filteredRegions.length > 0 ? (
-                                    filteredRegions.map((region) => (
-                                        <button
-                                            key={region.label}
-                                            type="button"
-                                            onClick={() => handleSelect(region.label)}
-                                            className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left transition-colors hover:bg-[#f1fafa]"
-                                        >
-                                            <span className="text-sm font-medium text-[#1a535c]">
-                                                {region.label}
-                                            </span>
+                                <div className="absolute left-0 right-0 top-[calc(100%+0.55rem)] z-[100] max-h-80 overflow-auto rounded-2xl border border-[#d7eff0] bg-white p-2 shadow-[0_18px_45px_rgba(29,170,173,0.14)] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#cfe9ea] hover:[&::-webkit-scrollbar-thumb]:bg-[#1daaad]">
+                                    {filteredRegions.length > 0 ? (
+                                        filteredRegions.map((region) => (
+                                            <button
+                                                key={region.label}
+                                                type="button"
+                                                onClick={() => handleSelect(region.label)}
+                                                className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left transition-colors hover:bg-[#f1fafa]"
+                                            >
+                                                <span className="text-sm font-medium text-[#1a535c]">
+                                                    {region.label}
+                                                </span>
 
-                                            <span className="ml-3 flex items-center gap-2">
-                                                {region.availability.water && (
-                                                    <span
-                                                        title="Δεδομένα νερού"
-                                                        className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-sky-100 text-sky-700"
-                                                    >
-                                                        <Droplets className="h-4 w-4" />
-                                                    </span>
-                                                )}
+                                                <span className="ml-3 flex items-center gap-2">
+                                                    {region.availability.water && (
+                                                        <span
+                                                            title="Δεδομένα νερού"
+                                                            className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-sky-100 text-sky-700"
+                                                        >
+                                                            <Droplets className="h-4 w-4" />
+                                                        </span>
+                                                    )}
 
-                                                {region.availability.recycle && (
-                                                    <span
-                                                        title="Δεδομένα ανακύκλωσης"
-                                                        className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700"
-                                                    >
-                                                        <Recycle className="h-4 w-4" />
-                                                    </span>
-                                                )}
+                                                    {region.availability.recycle && (
+                                                        <span
+                                                            title="Δεδομένα ανακύκλωσης"
+                                                            className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700"
+                                                        >
+                                                            <Recycle className="h-4 w-4" />
+                                                        </span>
+                                                    )}
 
-                                                {region.availability.air && (
-                                                    <span
-                                                        title="Δεδομένα αέρα"
-                                                        className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-100 text-cyan-700"
-                                                    >
-                                                        <Wind className="h-4 w-4" />
-                                                    </span>
-                                                )}
-                                            </span>
-                                        </button>
-                                    ))
-                                ) : (
-                                    <div className="rounded-xl px-3 py-4 text-sm text-[#1a535c]/70">
-                                        Δεν βρέθηκαν περιοχές για αυτή την αναζήτηση.
-                                    </div>
-                                )}
+                                                    {region.availability.air && (
+                                                        <span
+                                                            title="Δεδομένα αέρα"
+                                                            className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-100 text-cyan-700"
+                                                        >
+                                                            <Wind className="h-4 w-4" />
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <div className="rounded-xl px-3 py-4 text-sm text-[#1a535c]/70">
+                                            Δεν βρέθηκαν περιοχές για αυτή την αναζήτηση.
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -176,26 +211,28 @@ export default function RegionSearch() {
                     <button
                         type="button"
                         onClick={handleSearch}
-                        className="inline-flex h-14 items-center justify-center rounded-2xl bg-[#1daaad] px-6 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(29,170,173,0.22)] transition-all hover:-translate-y-0.5 hover:bg-[#179ca0]"
+                        className={`inline-flex ${buttonHeightClass} items-center justify-center rounded-2xl bg-[#1daaad] px-6 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(29,170,173,0.22)] transition-all hover:-translate-y-0.5 hover:bg-[#179ca0]`}
                     >
-                        Αναζήτηση
+                        {buttonText}
                     </button>
                 </div>
 
-                <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-[#1a535c]/75">
-                    <span className="inline-flex items-center gap-2 rounded-full bg-[#eefafa] px-3 py-1.5">
-                        <Droplets className="h-3.5 w-3.5 text-sky-700" />
-                        Νερό
-                    </span>
-                    <span className="inline-flex items-center gap-2 rounded-full bg-[#eefaf4] px-3 py-1.5">
-                        <Recycle className="h-3.5 w-3.5 text-emerald-700" />
-                        Ανακύκλωση
-                    </span>
-                    <span className="inline-flex items-center gap-2 rounded-full bg-[#eef8fb] px-3 py-1.5">
-                        <Wind className="h-3.5 w-3.5 text-cyan-700" />
-                        Αέρας
-                    </span>
-                </div>
+                {!compact && (
+                    <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-[#1a535c]/75">
+                        <span className="inline-flex items-center gap-2 rounded-full bg-[#eefafa] px-3 py-1.5">
+                            <Droplets className="h-3.5 w-3.5 text-sky-700" />
+                            Νερό
+                        </span>
+                        <span className="inline-flex items-center gap-2 rounded-full bg-[#eefaf4] px-3 py-1.5">
+                            <Recycle className="h-3.5 w-3.5 text-emerald-700" />
+                            Ανακύκλωση
+                        </span>
+                        <span className="inline-flex items-center gap-2 rounded-full bg-[#eef8fb] px-3 py-1.5">
+                            <Wind className="h-3.5 w-3.5 text-cyan-700" />
+                            Αέρας
+                        </span>
+                    </div>
+                )}
             </div>
         </div>
     )

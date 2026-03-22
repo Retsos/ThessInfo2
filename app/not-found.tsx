@@ -20,10 +20,10 @@ export default function NotFound() {
                 </p>
 
                 <Link
-                    href="/services"
+                    href="/"
                     className="mt-7 inline-flex h-11 items-center justify-center rounded-full bg-[#1daaad] px-6 text-sm font-semibold text-white transition-colors hover:bg-[#179ca0]"
                 >
-                    Επιστροφή στις υπηρεσίες
+                    Επιστροφή στην αρχική σελίδα
                 </Link>
             </div>
         </div>
