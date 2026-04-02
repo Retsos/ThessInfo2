@@ -48,18 +48,31 @@ export default function WaterMonthlyChart({ year, entries }: Props) {
 
     return (
         <div className="rounded-[1.5rem] border border-[#d7eff0] bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between gap-3">
-                <h4 className="text-lg font-semibold text-[#1a535c]">
-                    Μηνιαίο WQI
-                </h4>
-                {year ? (
-                    <span className="inline-flex rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold tracking-wide text-sky-800 ring-1 ring-sky-200">
-                        ΕΤΟΣ {year}
-                    </span>
-                ) : null}
+            <div className="rounded-2xl border border-sky-100 bg-gradient-to-br from-sky-50 to-white px-5 py-4 shadow-sm">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="max-w-xl">
+                        <h4 className="text-base sm:text-lg font-semibold text-[#1a535c] tracking-tight">
+                            Μηνιαίο WQI
+                        </h4>
+
+                        <p className="mt-1.5 text-sm leading-relaxed text-[#1a535c]/70">
+                            Η εξέλιξη του δείκτη ποιότητας νερού ανά μήνα για το επιλεγμένο έτος,
+                            αποτυπώνοντας την συνολική περιβαλλοντική εικόνα της περιοχής.
+                        </p>
+                    </div>
+
+                    {year && (
+                        <div className="flex shrink-0 self-start items-center sm:self-auto">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-1.5 text-xs font-semibold text-sky-800 ring-1 ring-sky-200 shadow-sm backdrop-blur">
+                                <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
+                                ΕΤΟΣ {year}
+                            </span>
+                        </div>
+                    )}
+                </div>
             </div>
 
-            <div className="mt-4 h-[320px] md:h-[360px]">
+            <div className="mt-5 h-[320px] md:h-[360px]">
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={chartData} margin={{ top: 10, right: 12, bottom: 10, left: 0 }}>
                         <CartesianGrid stroke="#dbeff0" strokeDasharray="3 3" />

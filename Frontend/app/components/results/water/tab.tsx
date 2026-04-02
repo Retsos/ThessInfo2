@@ -1,11 +1,12 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Droplets } from "lucide-react"
+import { ChevronLeft, ChevronRight, Droplets } from "lucide-react"
 import { getQualityLevel } from "@/lib/services/results-utils"
 import WaterConclusionChart from "./WaterConclusionChart"
 import WaterInfoCard from "./WaterInfoCard"
 import WaterMonthlyChart from "./WaterMonthlyChart"
+import WaterWqiInfoModal from "./WaterWqiInfoModal"
 import WaterYearlyChart from "./WaterYearlyChart"
 import type { WaterTabData } from "./water-types"
 
@@ -58,10 +59,22 @@ export default function WaterTab({ regionLabel, water }: Props) {
     const [selectedMonthIndex, setSelectedMonthIndex] = useState(() =>
         getLatestIndex(months, latestMonthTs)
     )
+    const [isWqiModalOpen, setIsWqiModalOpen] = useState(false)
 
     useEffect(() => {
         setSelectedMonthIndex(getLatestIndex(months, latestMonthTs))
     }, [months, latestMonthTs])
+
+    useEffect(() => {
+        if (!isWqiModalOpen) return
+
+        const previousOverflow = document.body.style.overflow
+        document.body.style.overflow = "hidden"
+
+        return () => {
+            document.body.style.overflow = previousOverflow
+        }
+    }, [isWqiModalOpen])
 
     if (!water || !months.length) {
         return (
@@ -97,11 +110,11 @@ export default function WaterTab({ regionLabel, water }: Props) {
     const overallWqi = selectedYear ? water.overallWqiByYear[selectedYear] ?? null : null
     const yearMeasurements = selectedYear
         ? months
-              .filter((month) => month.startsWith(selectedYear))
-              .reduce((total, month) => {
-                  const monthData = water.analysesByMonth[month]?.measurements ?? []
-                  return total + monthData.length
-              }, 0)
+            .filter((month) => month.startsWith(selectedYear))
+            .reduce((total, month) => {
+                const monthData = water.analysesByMonth[month]?.measurements ?? []
+                return total + monthData.length
+            }, 0)
         : 0
 
     const canGoPrev = safeIndex > 0
@@ -145,66 +158,56 @@ export default function WaterTab({ regionLabel, water }: Props) {
                         </p>
                     </div>
                 </div>
-            </div>
 
-            <div className="rounded-[1.5rem] border border-sky-100 bg-white p-5 shadow-sm">
-                <h4 className="text-lg font-semibold text-[#1a535c]">How WQI is calculated</h4>
-                <p className="mt-2 text-sm leading-6 text-[#1a535c]/82">
-                    Backend formula in <code>calculate_wqi</code>:{" "}
-                    <code>qi = 100 * ((value - ideal) / (Si - ideal))</code>, then{" "}
-                    <code>WQI = sum(Wi * qi) / sum(Wi)</code>.
-                </p>
-                <p className="mt-2 text-sm leading-6 text-[#1a535c]/82">
-                    Values with missing measurements are skipped. Parameter matching is done by name
-                    contains logic (for example <code>pH</code>, <code>chloride</code>,{" "}
-                    <code>conductivity</code>).
-                </p>
+                <div className="mx-auto mt-5 w-full max-w-2xl rounded-2xl border border-[#cfe9ea] bg-[#fbffff] px-4 py-4 shadow-[0_18px_45px_rgba(29,170,173,0.14)]">
+                    <div className="flex flex-col items-center justify-center gap-3 text-center sm:flex-row sm:text-left">
+                        <button
+                            type="button"
+                            onClick={() => setSelectedMonthIndex((prev) => Math.max(0, prev - 1))}
+                            disabled={!canGoPrev}
+                            className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#cfe9ea] bg-white text-[#1daaad] shadow-sm transition hover:border-[#1daaad] hover:bg-[#eefafa] disabled:cursor-not-allowed disabled:opacity-35"
+                            aria-label="Προηγούμενος μήνας"
+                        >
+                            <ChevronLeft className="h-5 w-5" />
+                        </button>
 
-                <div className="mt-4 overflow-x-auto rounded-xl border border-sky-100">
-                    <table className="min-w-full text-left text-sm text-[#1a535c]/88">
-                        <thead className="bg-sky-50/70 text-xs uppercase tracking-wide text-[#1a535c]/72">
-                            <tr>
-                                <th className="px-4 py-2">Parameter group</th>
-                                <th className="px-4 py-2">Si</th>
-                                <th className="px-4 py-2">Ideal</th>
-                                <th className="px-4 py-2">Weight (Wi)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {WQI_RULES.map((rule) => (
-                                <tr key={rule.parameter} className="border-t border-sky-100">
-                                    <td className="px-4 py-2 font-medium">{rule.parameter}</td>
-                                    <td className="px-4 py-2">{rule.si}</td>
-                                    <td className="px-4 py-2">{rule.ideal}</td>
-                                    <td className="px-4 py-2">{rule.weight}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                        <div className="min-w-0">
+                            <p className="text-sm font-semibold text-[#1a535c]">
+                                Αλλάζεις τον επιλεγμένο μήνα
+                            </p>
+                            <p className="mt-1 text-xs leading-5 text-[#1a535c]/72">
+                                Τα arrows ενημερώνουν τα cards και το πρώτο διάγραμμα με τα
+                                δεδομένα του νέου μήνα.
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setSelectedMonthIndex((prev) => Math.min(months.length - 1, prev + 1))
+                            }
+                            disabled={!canGoNext}
+                            className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#cfe9ea] bg-white text-[#1daaad] shadow-sm transition hover:border-[#1daaad] hover:bg-[#eefafa] disabled:cursor-not-allowed disabled:opacity-35"
+                            aria-label="Επόμενος μήνας"
+                        >
+                            <ChevronRight className="h-5 w-5" />
+                        </button>
+                    </div>
                 </div>
 
-                <p className="mt-3 text-sm leading-6 text-[#1a535c]/82">
-                    Rating thresholds from backend:{" "}
-                    <code>{`<=25 Excellent, <=50 Good, <=75 Poor, <=100 Very Poor, >100 Unsuitable`}</code>.
-                </p>
-                <p className="mt-2 text-sm leading-6 text-[#1a535c]/82">
-                    {selectedYear
-                        ? `For the selected year ${selectedYear}, the overall WQI is computed from all measurements in that year (${yearMeasurements} measurement rows loaded in the frontend).`
-                        : "Select a month/year to see year-specific WQI context."}
-                </p>
+                <div className="mt-4 flex justify-center sm:justify-start">
+                    <button
+                        type="button"
+                        onClick={() => setIsWqiModalOpen(true)}
+                        className="inline-flex cursor-pointer items-center rounded-full border border-sky-200 bg-white px-4 py-2 text-sm font-medium text-sky-800 shadow-sm transition hover:border-sky-300 hover:bg-sky-50"
+                    >
+                        Πώς υπολογίζεται το WQI;
+                    </button>
+                </div>
             </div>
 
             <div className="grid gap-6 xl:grid-cols-2">
-                <WaterInfoCard
-                    analysis={selectedAnalysis}
-                    monthTs={selectedMonthTs}
-                    canGoPrev={canGoPrev}
-                    canGoNext={canGoNext}
-                    onPrev={() => setSelectedMonthIndex((prev) => Math.max(0, prev - 1))}
-                    onNext={() =>
-                        setSelectedMonthIndex((prev) => Math.min(months.length - 1, prev + 1))
-                    }
-                />
+                <WaterInfoCard analysis={selectedAnalysis} monthTs={selectedMonthTs} />
                 <WaterMonthlyChart year={selectedYear} entries={selectedMonthlyWqi} />
             </div>
 
@@ -212,6 +215,13 @@ export default function WaterTab({ regionLabel, water }: Props) {
                 <WaterYearlyChart overallByYear={water.overallWqiByYear} />
                 <WaterConclusionChart stats={selectedStats} year={selectedYear} />
             </div>
+            <WaterWqiInfoModal
+                open={isWqiModalOpen}
+                onClose={() => setIsWqiModalOpen(false)}
+                rules={WQI_RULES}
+                selectedYear={selectedYear}
+                yearMeasurements={yearMeasurements}
+            />
         </div>
     )
 }

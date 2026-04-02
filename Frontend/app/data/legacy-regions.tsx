@@ -14,7 +14,7 @@ import { MdAir } from 'react-icons/md'
             tooltip1: "Δεδομένα νερού",
         },
         {
-            value: 'Ανάληψη',
+            value: 'analipsi',
             label: 'Ανάληψη',
             RecycleName: 'a',
             airName: 'a',
@@ -22,7 +22,7 @@ import { MdAir } from 'react-icons/md'
             tooltip1: "Δεδομένα νερού",
         },
         {
-            value: 'Αμπελόκηποι',
+            value: 'ampelokipoi',
             label: 'Αμπελόκηποι',
             RecycleName: 'Αμπελόκηποι',
             airName: 'Ampelokipoi',
@@ -48,7 +48,7 @@ import { MdAir } from 'react-icons/md'
             tooltip3: "Δεδομένα αέρα"
         },
         {
-            value: 'thessaloniki',//???????????
+            value: 'ano_toympa',
             label: 'Άνω Τούμπα',
             RecycleName: 'a',
             airName: 'a',
@@ -56,7 +56,7 @@ import { MdAir } from 'react-icons/md'
             tooltip1: "Δεδομένα νερού",
         },
         {
-            value: 'ΔΕΘ-ΧΑΝΘ',
+            value: 'deth-hanth',
             label: 'ΔΕΘ-ΧΑΝΘ',
             RecycleName: 'a',
             airName: 'a',
@@ -64,7 +64,7 @@ import { MdAir } from 'react-icons/md'
             tooltip1: "Δεδομένα νερού",
         },
         {
-            value: 'Κάτω Τούμπα',
+            value: 'kato_toympa',
             label: 'Κάτω Τούμπα',
             RecycleName: 'a',
             airName: 'a',
@@ -72,7 +72,7 @@ import { MdAir } from 'react-icons/md'
             tooltip1: "Δεδομένα νερού",
         },
         {
-            value: 'Κέντρο πόλης',
+            value: 'kentro_polis',
             label: 'Κέντρο πόλης',
             RecycleName: 'a',
             airName: 'Thessaloniki',
@@ -90,7 +90,7 @@ import { MdAir } from 'react-icons/md'
             tooltip3: "Δεδομένα αέρα"
         },
         {
-            value: 'Κωνσταντινουπολίτικα',
+            value: 'konstantinoypolitika',
             label: 'Κωνσταντινουπολίτικα',
             RecycleName: 'kwnst',
             airName: 'a',
@@ -98,7 +98,7 @@ import { MdAir } from 'react-icons/md'
             tooltip1: "Δεδομένα νερού",
         },
         {
-            value: 'Νέα Παραλία',
+            value: 'nea_paralia',
             label: 'Νέα Παραλία',
             RecycleName: 'a',
             airName: 'a',
@@ -106,7 +106,7 @@ import { MdAir } from 'react-icons/md'
             tooltip1: "Δεδομένα νερού",
         },
         {
-            value: 'Ντεπώ',
+            value: 'ntepo',
             label: 'Ντεπώ',
             RecycleName: 'a',
             airName: 'a',
@@ -114,7 +114,7 @@ import { MdAir } from 'react-icons/md'
             tooltip1: "Δεδομένα νερού",
         },
         {
-            value: 'Παναγία Φανερωμένη',
+            value: 'panagia_faneromeni',
             label: 'Παναγία Φανερωμένη',
             RecycleName: 'a',
             airName: 'a',
@@ -142,7 +142,7 @@ import { MdAir } from 'react-icons/md'
             tooltip3: "Δεδομένα αέρα"
         },
         {
-            value: 'Σχολή Τυφλών',
+            value: 'sholi_tyflon',
             label: 'Σχολή Τυφλών',
             RecycleName: 'a',
             airName: 'a',
@@ -172,7 +172,7 @@ import { MdAir } from 'react-icons/md'
             tooltip3: "Δεδομένα αέρα"
         },
         {
-            value: 'ευοσμος',
+            value: 'euosmos',
             label: 'Εύοσμος',
             RecycleName: 'Εύοσμος',
             airName: 'Εύοσμος',
@@ -180,7 +180,7 @@ import { MdAir } from 'react-icons/md'
             tooltip1: "Δεδομένα νερού",
         },
         {
-            value: 'Ευκαρπία',
+            value: 'eykarpia',
             label: 'Ευκαρπία',
             RecycleName: 'Ευκαρπία',
             airName: 'Ευκαρπία',
@@ -188,7 +188,7 @@ import { MdAir } from 'react-icons/md'
             tooltip1: "Δεδομένα νερού",
         },
         {
-            value: 'ΒΙΠΕΘ',
+            value: 'bipeth',
             label: 'ΒΙΠΕΘ',
             RecycleName: 'ΒΙΠΕΘ',
             airName: 'ΒΙΠΕΘ',
@@ -196,7 +196,7 @@ import { MdAir } from 'react-icons/md'
             tooltip1: "Δεδομένα νερού",
         },
         {
-            value: 'Άγιος Παύλος',
+            value: 'agios_paulos',
             label: 'Άγιος Παύλος',
             RecycleName: 'Άγιος Παύλος',
             airName: 'Άγιος Παύλος',
@@ -228,7 +228,7 @@ import { MdAir } from 'react-icons/md'
             tooltip3: "Δεδομένα αέρα"
         },
         {
-            value: 'Πλατεία Δημοκρατίας',
+            value: 'plateia_dimokratias',
             label: 'Πλατεία Δημοκρατίας',
             RecycleName: 'a',
             airName: 'Pulaia',
@@ -238,7 +238,7 @@ import { MdAir } from 'react-icons/md'
             tooltip3: "Δεδομένα αέρα"
         },
         {
-            value: 'Πυλαία',
+            value: 'pylaia',
             label: 'Πυλαία',
             RecycleName: 'ΠΥΛΑΙΑ-ΧΟΡΤΙΑΤΗΣ',
             airName: 'Pulaia',
@@ -250,7 +250,7 @@ import { MdAir } from 'react-icons/md'
             tooltip3: "Δεδομένα αέρα"
         },
         {
-            value: 'Πυλαία (ΙΚΕΑ)',
+            value: 'pylaia_ikea',
             label: 'Πυλαία (ΙΚΕΑ)',
             RecycleName: 'ΠΥΛΑΙΑ-ΧΟΡΤΙΑΤΗΣ',
             airName: 'Pulaia',
@@ -270,7 +270,7 @@ import { MdAir } from 'react-icons/md'
             tooltip3: "Δεδομένα αέρα"
         },
         {
-            value: 'Σφαγεία',
+            value: 'sfageia',
             label: 'Σφαγεία',
             RecycleName: 'a',
             airName: 'a',
@@ -278,7 +278,7 @@ import { MdAir } from 'react-icons/md'
             tooltip1: "Δεδομένα νερού",
         },
         {
-            value: 'Τριανδρία',
+            value: 'triandria',
             label: 'Τριανδρία',
             RecycleName: 'a',
             airName: 'a',
@@ -286,7 +286,7 @@ import { MdAir } from 'react-icons/md'
             tooltip1: "Δεδομένα νερού",
         },
         {
-            value: 'Ξηροκρήνη',
+            value: 'xirokrini',
             label: 'Ξηροκρήνη',
             RecycleName: 'a',
             airName: 'a',
@@ -294,7 +294,7 @@ import { MdAir } from 'react-icons/md'
             tooltip1: "Δεδομένα νερού",
         },
         {
-            value: 'Χαριλάου',
+            value: 'harilaoyf',
             label: 'Χαριλάου',
             RecycleName: 'a',
             airName: 'a',
