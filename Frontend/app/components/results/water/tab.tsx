@@ -16,12 +16,12 @@ type Props = {
 }
 
 const WQI_RULES = [
-    { parameter: "pH", si: 8.5, ideal: 7.0, weight: 0.22 },
-    { parameter: "Turbidity", si: 1.0, ideal: 0.0, weight: 0.15 },
-    { parameter: "Chlorides", si: 250.0, ideal: 0.0, weight: 0.1 },
-    { parameter: "Conductivity", si: 2500.0, ideal: 0.0, weight: 0.08 },
-    { parameter: "Aluminum", si: 200.0, ideal: 0.0, weight: 0.12 },
-    { parameter: "Residual chlorine", si: 0.5, ideal: 0.0, weight: 0.2 },
+    { parameter: "Συγκέντρωση ιόντων υδρογόνου (pH)", si: 8.5, ideal: 7.0, weight: 0.22 },
+    { parameter: "Θολότητα", si: 1.0, ideal: 0.0, weight: 0.15 },
+    { parameter: "Χλωριούχα", si: 250.0, ideal: 0.0, weight: 0.1 },
+    { parameter: "Αγωγιμότητα", si: 2500.0, ideal: 0.0, weight: 0.08 },
+    { parameter: "Αργίλιο", si: 200.0, ideal: 0.0, weight: 0.12 },
+    { parameter: "Υπολειμματικό χλώριο", si: 0.5, ideal: 0.0, weight: 0.2 },
 ]
 
 function getLatestIndex(months: string[], latest: string | null): number {
