@@ -1,22 +1,14 @@
 "use client"
 
-import {
-    CheckCircle2,
-    ChevronLeft,
-    ChevronRight,
-    CircleMinus,
-    Info,
-    TriangleAlert,
-    XCircle,
-} from "lucide-react"
+import { CheckCircle2, CircleMinus, Info, TriangleAlert, XCircle } from "lucide-react"
 import type { MonthlyAnalysisResponse } from "./water-types"
 
 const tooltips: Record<string, string> = {
     "Θολότητα NTU": "Η θολότητα δείχνει πόσο καθαρό είναι το νερό.",
-    "Χρώμα": "Το χρώμα δείχνει αν το νερό είναι οπτικά καθαρό.",
-    "Αργίλιο": "Το αργίλιο μπορεί να σχετίζεται με τη διαδικασία καθαρισμού.",
-    "Χλωριούχα": "Τα χλωριούχα δείχνουν την παρουσία αλάτων.",
-    "Αγωγιμότητα": "Η αγωγιμότητα δείχνει τη συγκέντρωση διαλυμένων αλάτων.",
+    Χρώμα: "Το χρώμα δείχνει αν το νερό είναι οπτικά καθαρό.",
+    Αργίλιο: "Το αργίλιο μπορεί να σχετίζεται με τη διαδικασία καθαρισμού.",
+    Χλωριούχα: "Τα χλωριούχα δείχνουν την παρουσία αλάτων.",
+    Αγωγιμότητα: "Η αγωγιμότητα δείχνει τη συγκέντρωση διαλυμένων αλάτων.",
     "Συγκέντρωση ιόντων υδρογόνου": "Το pH δείχνει αν το νερό είναι όξινο ή αλκαλικό.",
     "Υπολειμματικό χλώριο": "Δείχνει την ποσότητα χλωρίου που παραμένει μετά την απολύμανση.",
 }
@@ -24,10 +16,6 @@ const tooltips: Record<string, string> = {
 type Props = {
     analysis: MonthlyAnalysisResponse | null
     monthTs: string | null
-    canGoPrev: boolean
-    canGoNext: boolean
-    onPrev: () => void
-    onNext: () => void
 }
 
 function formatMonthTs(monthTs: string | null): string {
@@ -81,54 +69,40 @@ function MeasurementStatusIcon({ status }: { status: string }) {
     return <XCircle className="h-5 w-5 text-red-600" aria-label="Μη συμμόρφωση" />
 }
 
-export default function WaterInfoCard({
-    analysis,
-    monthTs,
-    canGoPrev,
-    canGoNext,
-    onPrev,
-    onNext,
-}: Props) {
+export default function WaterInfoCard({ analysis, monthTs }: Props) {
     const measurements = analysis?.measurements ?? []
     const activeYear = getYearFromMonthTs(monthTs)
 
     return (
         <div className="rounded-[1.5rem] border border-sky-100 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between gap-3 rounded-2xl border border-sky-100 bg-sky-50/70 px-3 py-2">
-                <button
-                    type="button"
-                    onClick={onPrev}
-                    disabled={!canGoPrev}
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-sky-200 bg-white text-sky-700 shadow-sm transition hover:border-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-35"
-                    aria-label="Προηγούμενος μήνας"
-                >
-                    <ChevronLeft className="h-5 w-5" />
-                </button>
+            <div className="rounded-2xl border border-sky-100 bg-gradient-to-br from-sky-50 to-white px-5 py-4 shadow-sm">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="max-w-xl">
+                        <h4 className="text-base sm:text-lg font-semibold text-[#1a535c] tracking-tight">
+                            Λεπτομέρειες μήνα
+                        </h4>
 
-                <div className="text-center">
-                    <h4 className="text-center text-lg font-semibold text-[#1a535c]">
-                        Λεπτομέρειες μήνα: {formatMonthTs(monthTs)}
-                    </h4>
-                    {activeYear ? (
-                        <span className="mt-1 inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold tracking-wide text-sky-700 ring-1 ring-sky-200">
-                            ΕΤΟΣ {activeYear}
-                        </span>
-                    ) : null}
+                        <p className="mt-1.5 text-sm leading-relaxed text-[#1a535c]/70">
+                            Αναλυτική εικόνα των μετρήσεων του επιλεγμένου μήνα, με τιμές,
+                            ποσοστά και ένδειξη συμμόρφωσης για κάθε παράμετρο.
+                        </p>
+                    </div>
+
+                    {activeYear && (
+                        <div className="flex shrink-0 self-start items-center sm:self-auto">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-1.5 text-xs font-semibold text-sky-800 ring-1 ring-sky-200 shadow-sm backdrop-blur">
+                                <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
+                                {formatMonthTs(monthTs)}
+                            </span>
+                        </div>
+                    )}
                 </div>
-
-                <button
-                    type="button"
-                    onClick={onNext}
-                    disabled={!canGoNext}
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-sky-200 bg-white text-sky-700 shadow-sm transition hover:border-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-35"
-                    aria-label="Επόμενος μήνας"
-                >
-                    <ChevronRight className="h-5 w-5" />
-                </button>
             </div>
 
             {!measurements.length ? (
-                <p className="mt-4 text-sm text-[#1a535c]/75">Δεν υπάρχουν μετρήσεις για αυτόν τον μήνα.</p>
+                <p className="mt-4 text-sm text-[#1a535c]/75">
+                    Δεν υπάρχουν μετρήσεις για αυτόν τον μήνα.
+                </p>
             ) : (
                 <ul className="mt-4 space-y-3">
                     {measurements.map((item, idx) => {

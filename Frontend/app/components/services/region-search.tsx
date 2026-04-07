@@ -102,10 +102,6 @@ export default function RegionSearch({
 
     return (
         <div className={rootClass}>
-            {!compact && (
-                <div className="h-1.5 w-full bg-[linear-gradient(90deg,#2c999b_0%,#1daaad_50%,#006264_100%)]" />
-            )}
-
             <div className={bodyClass}>
                 <div className="flex flex-col gap-4 md:flex-row md:items-end">
                     <div className="flex-1" ref={wrapperRef}>
@@ -145,7 +141,7 @@ export default function RegionSearch({
                                         className="ml-2 rounded-full p-1 text-[#1a535c]/55 transition-colors hover:bg-[#eefafa] hover:text-[#006264]"
                                         aria-label="Καθαρισμός"
                                     >
-                                        <X className="h-4 w-4" />
+                                        <X className="h-4 w-4 cursor-pointer" />
                                     </button>
                                 )}
                             </div>
@@ -208,7 +204,7 @@ export default function RegionSearch({
                     <button
                         type="button"
                         onClick={handleSearch}
-                        className={`inline-flex ${buttonHeightClass} items-center justify-center rounded-2xl bg-[#1daaad] px-6 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(29,170,173,0.22)] transition-all hover:-translate-y-0.5 hover:bg-[#179ca0]`}
+                        className={`inline-flex ${buttonHeightClass} cursor-pointer items-center justify-center rounded-2xl bg-[#1daaad] px-6 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(29,170,173,0.22)] transition-all hover:-translate-y-0.5 hover:bg-[#179ca0]`}
                     >
                         {buttonText}
                     </button>
