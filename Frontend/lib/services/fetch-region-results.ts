@@ -1,8 +1,9 @@
-import api from "@/lib/api"
+﻿import api from "@/lib/api"
 import type { RegionCatalogItem } from "../../app/data/region-catalog"
-import type { AirDataResponse } from "../../app/components/results/air/air-types"
+import type { AirResultsData } from "../../app/components/results/air/air-types"
 import type { WaterTabData } from "../../app/components/results/water/water-types"
 import { fetchWaterResults } from "./fetch-water-results"
+import { fetchAirResults } from "./fetch-air-results"
 
 export type RegionResultsData = {
     water: WaterTabData | null
@@ -12,8 +13,7 @@ export type RegionResultsData = {
         usableGeneral: unknown | null
     }
     air: {
-        latest: AirDataResponse | null
-        yearly: AirDataResponse | null
+        data: AirResultsData | null
     }
 }
 
@@ -38,12 +38,7 @@ export async function fetchRegionResults(
     const airKey = region.keys.air
 
     const calls = [
-        airKey
-            ? api.get(`airquality/area/${encodeURIComponent(airKey)}/latest-measurements/`)
-            : Promise.resolve(null),
-        airKey
-            ? api.get(`airquality/area/${encodeURIComponent(airKey)}/group-by-year/`)
-            : Promise.resolve(null),
+        airKey ? fetchAirResults(airKey) : Promise.resolve(null),
         recycleKey
             ? api.get(`recycle/recycling-ota/?region=${encodeURIComponent(recycleKey)}`)
             : Promise.resolve(null),
@@ -58,14 +53,15 @@ export async function fetchRegionResults(
 
     const results = await Promise.allSettled(calls)
 
-    const airLatest = extractData<AirDataResponse>(results[0])
-    const airYearly = extractData<AirDataResponse>(results[1])
-    const recycleOta = extractData<unknown>(results[2])
-    const recyclePerPerson = extractData<unknown>(results[3])
-    const recycleGeneral = extractData<{ results?: Record<string, unknown> }>(results[4])
+    const airData =
+        results[0].status === "fulfilled" ? (results[0].value as AirResultsData | null) : null
+
+    const recycleOta = extractData<unknown>(results[1])
+    const recyclePerPerson = extractData<unknown>(results[2])
+    const recycleGeneral = extractData<{ results?: Record<string, unknown> }>(results[3])
 
     const waterData =
-        results[5].status === "fulfilled" ? (results[5].value as WaterTabData | null) : null
+        results[4].status === "fulfilled" ? (results[4].value as WaterTabData | null) : null
 
     let recycleUsableGeneral: unknown | null = null
 
@@ -91,9 +87,7 @@ export async function fetchRegionResults(
             usableGeneral: recycleUsableGeneral,
         },
         air: {
-            latest: airLatest,
-            yearly: airYearly,
+            data: airData,
         },
     }
 }
-

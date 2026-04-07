@@ -11,7 +11,7 @@ import {
     Tooltip,
     Legend,
 } from "recharts"
-import type { AirDataResponse } from "./air-types"
+import type { AirResultsData } from "./air-types"
 
 const COLORS: Record<string, string> = {
     co_conc: "#8884d8",
@@ -21,12 +21,12 @@ const COLORS: Record<string, string> = {
     so2_conc: "#413ea0",
 }
 
-const MONTH_MAP: Record<string, string> = {
+const MONTH_LABELS: Record<string, string> = {
     January: "Ιαν",
     February: "Φεβ",
     March: "Μαρ",
     April: "Απρ",
-    May: "Μαϊ",
+    May: "Μαι",
     June: "Ιουν",
     July: "Ιουλ",
     August: "Αυγ",
@@ -37,12 +37,24 @@ const MONTH_MAP: Record<string, string> = {
 }
 
 type Props = {
-    airData: AirDataResponse | null
+    data: AirResultsData | null
+    selectedYear: number
 }
 
-export default function AirMonthlyStackedBar({ airData }: Props) {
-    const years = Object.keys(airData ?? {}).filter((k) => /^\d{4}$/.test(k))
-    if (!years.length) {
+export default function AirMonthlyStackedBar({ data, selectedYear }: Props) {
+    const yearKey = String(selectedYear)
+    const monthly = data?.monthsByYear[yearKey] ?? []
+
+    const chartData = useMemo(
+        () =>
+            monthly.map((row) => ({
+                month: MONTH_LABELS[row.month_name] ?? row.month_name,
+                ...row.averages,
+            })),
+        [monthly]
+    )
+
+    if (!data) {
         return (
             <div className="rounded-[1.5rem] border border-[#d7eff0] bg-white p-6 shadow-sm">
                 <p className="text-sm text-[#1a535c]/75">Δεν υπάρχουν δεδομένα ρύπων.</p>
@@ -50,33 +62,13 @@ export default function AirMonthlyStackedBar({ airData }: Props) {
         )
     }
 
-    const latestYear = String(Math.max(...years.map((y) => +y)))
-    const latestYearEntry = airData?.[latestYear] as {
-        monthly_averages?: Record<string, { averages?: Record<string, number | null> }>
-    }
-    const monthly = latestYearEntry?.monthly_averages || {}
-
-    const data = useMemo(() => {
-        return Object.entries(monthly)
-            .map(([engMonth, entry]) => ({
-                month: MONTH_MAP[engMonth] || engMonth,
-                ...(entry?.averages ?? {}),
-            }))
-            .sort((a, b) => {
-                const order = Object.values(MONTH_MAP)
-                return order.indexOf(a.month) - order.indexOf(b.month)
-            })
-    }, [monthly])
-
     return (
         <div className="rounded-[1.5rem] border border-[#d7eff0] bg-white p-5 shadow-sm">
-            <h4 className="text-lg font-semibold text-[#1a535c]">
-                Συγκεντρώσεις Ρύπων ανά Μήνα — {latestYear}
-            </h4>
+            <h4 className="text-lg font-semibold text-[#1a535c]">Συγκεντρώσεις Ρύπων ανά Μήνα - {yearKey}</h4>
 
             <div className="mt-4 h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={data} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
+                    <BarChart data={chartData} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#dbeff0" />
                         <XAxis dataKey="month" />
                         <YAxis />

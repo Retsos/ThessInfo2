@@ -29,3 +29,6 @@ app.include_router(recycle_router)
 @app.get("/")
 def read_root():
     return {"message": "Γεια σου από το FastAPI!"}
+
+
+#uvicorn app.server:app --reload --host

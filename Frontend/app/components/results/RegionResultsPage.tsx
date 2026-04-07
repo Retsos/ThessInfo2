@@ -122,8 +122,7 @@ export default function RegionResultsPage({ region }: Props) {
                         {activeTab === "air" && (
                             <AirTab
                                 regionLabel={region.label}
-                                latest={data.air.latest}
-                                yearly={data.air.yearly}
+                                data={data.air.data}
                             />
                         )}
                     </>

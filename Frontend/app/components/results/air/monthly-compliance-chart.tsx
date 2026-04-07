@@ -10,14 +10,14 @@ import {
     CartesianGrid,
     Tooltip,
 } from "recharts"
-import type { AirDataResponse } from "./air-types"
+import type { AirResultsData } from "./air-types"
 
-const MONTH_MAP: Record<string, string> = {
+const MONTH_LABELS: Record<string, string> = {
     January: "Ιαν",
     February: "Φεβ",
     March: "Μαρ",
     April: "Απρ",
-    May: "Μαϊ",
+    May: "Μαι",
     June: "Ιουν",
     July: "Ιουλ",
     August: "Αυγ",
@@ -28,12 +28,27 @@ const MONTH_MAP: Record<string, string> = {
 }
 
 type Props = {
-    airData: AirDataResponse | null
+    data: AirResultsData | null
+    selectedYear: number
 }
 
-export default function AirMonthlyComplianceChart({ airData }: Props) {
-    const years = Object.keys(airData ?? {}).filter((k) => /^\d{4}$/.test(k))
-    if (!years.length) {
+export default function AirMonthlyComplianceChart({ data, selectedYear }: Props) {
+    const yearKey = String(selectedYear)
+    const monthlyIndex = data?.monthlyIndexByYear[yearKey] ?? []
+
+    const chartData = useMemo(
+        () =>
+            monthlyIndex
+                .slice()
+                .sort((a, b) => a.month - b.month)
+                .map((row) => ({
+                    month: MONTH_LABELS[row.month_name] ?? row.month_name,
+                    aqi: row.aqi_score ?? 0,
+                })),
+        [monthlyIndex]
+    )
+
+    if (!data) {
         return (
             <div className="rounded-[1.5rem] border border-[#d7eff0] bg-white p-6 shadow-sm">
                 <p className="text-sm text-[#1a535c]/75">Δεν υπάρχουν δεδομένα συμμόρφωσης.</p>
@@ -41,46 +56,20 @@ export default function AirMonthlyComplianceChart({ airData }: Props) {
         )
     }
 
-    const latestYear = String(Math.max(...years.map((y) => +y)))
-    const latestYearEntry = airData?.[latestYear] as {
-        monthly_averages?: Record<string, { compliant_count?: string }>
-    }
-    const monthly = latestYearEntry?.monthly_averages || {}
-
-    const data = useMemo(() => {
-        return Object.entries(monthly)
-            .map(([engMonth, entry]) => {
-                const compliant = entry?.compliant_count ?? ""
-                const [num, den] = compliant.split("/").map((n) => +n)
-                const pct = den ? +((num / den) * 100).toFixed(1) : 0
-
-                return {
-                    month: MONTH_MAP[engMonth] || engMonth,
-                    compliance: pct,
-                }
-            })
-            .sort((a, b) => {
-                const order = Object.values(MONTH_MAP)
-                return order.indexOf(a.month) - order.indexOf(b.month)
-            })
-    }, [monthly])
-
     return (
         <div className="rounded-[1.5rem] border border-[#d7eff0] bg-white p-5 shadow-sm">
-            <h4 className="text-lg font-semibold text-[#1a535c]">
-                Ποσοστό Συμμόρφωσης ανά Μήνα — {latestYear}
-            </h4>
+            <h4 className="text-lg font-semibold text-[#1a535c]">AQI ανά Μήνα - {yearKey}</h4>
 
             <div className="mt-4 h-[260px]">
                 <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={data} margin={{ top: 10, right: 20, bottom: 20, left: 0 }}>
+                    <LineChart data={chartData} margin={{ top: 10, right: 20, bottom: 20, left: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#dbeff0" />
                         <XAxis dataKey="month" />
-                        <YAxis domain={[0, 100]} unit="%" />
-                        <Tooltip formatter={(val) => `${val}%`} />
+                        <YAxis domain={[0, 100]} />
+                        <Tooltip formatter={(val) => `AQI ${val}`} />
                         <Line
                             type="monotone"
-                            dataKey="compliance"
+                            dataKey="aqi"
                             stroke="#4CAF50"
                             strokeWidth={2}
                             dot={{ r: 4 }}
