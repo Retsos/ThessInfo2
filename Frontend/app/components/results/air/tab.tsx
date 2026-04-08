@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { ChevronLeft, ChevronRight, Wind } from "lucide-react"
+import AirAqiInfoModal from "./AirAqiInfoModal"
 import AirLatestCard from "./latest-card"
-import AirYearlyChart from "./yearly-chart"
-import AirMonthlyStackedBar from "./monthly-stacked-bar"
 import AirMonthlyComplianceChart from "./monthly-compliance-chart"
+import AirMonthlyStackedBar from "./monthly-stacked-bar"
+import AirYearlyChart from "./yearly-chart"
 import type { AirMonthConcentrations, AirResultsData } from "./air-types"
 
 type Props = {
@@ -13,43 +14,98 @@ type Props = {
     data: AirResultsData | null
 }
 
-const AIR_EXPLANATIONS: Array<{
-    key: string
-    label: string
-    unit: string
-    description: string
-}> = [
-    {
-        key: "no2_conc",
-        label: "NO2 (Διοξείδιο του αζώτου)",
-        unit: "μg/m³",
-        description: "Ρύπος από κυκλοφορία και καύσεις, ερεθιστικός για το αναπνευστικό.",
-    },
-    {
-        key: "o3_conc",
-        label: "O3 (Όζον)",
-        unit: "μg/m³",
-        description: "Δευτερογενής ρύπος που σχηματίζεται στην ατμόσφαιρα.",
-    },
-    {
-        key: "so2_conc",
-        label: "SO2 (Διοξείδιο του θείου)",
-        unit: "μg/m³",
-        description: "Σχετίζεται με καύση καυσίμων που περιέχουν θείο.",
-    },
-    {
-        key: "no_conc",
-        label: "NO (Μονοξείδιο του αζώτου)",
-        unit: "μg/m³",
-        description: "Πρόδρομος ρύπος για άλλα οξειδωτικά στην ατμόσφαιρα.",
-    },
-    {
-        key: "co_conc",
-        label: "CO (Μονοξείδιο του άνθρακα)",
-        unit: "mg/m³",
-        description: "Προέρχεται από ατελή καύση. Στο backend μετατρέπεται σε mg/m³.",
-    },
-]
+function parseCompliance(value: string | null | undefined) {
+    if (!value) {
+        return {
+            compliant: null as number | null,
+            total: null as number | null,
+            percentage: null as number | null,
+        }
+    }
+
+    const normalized = value.includes(" of ") ? value : value.replace("/", " of ")
+    const parts = normalized.split(" of ")
+    if (parts.length !== 2) {
+        return {
+            compliant: null,
+            total: null,
+            percentage: null,
+        }
+    }
+
+    const compliant = Number(parts[0])
+    const total = Number(parts[1])
+
+    if (!Number.isFinite(compliant) || !Number.isFinite(total) || total <= 0) {
+        return {
+            compliant: null,
+            total: null,
+            percentage: null,
+        }
+    }
+
+    return {
+        compliant,
+        total,
+        percentage: Number(((compliant / total) * 100).toFixed(1)),
+    }
+}
+
+function getAqiSummary(score: number | null) {
+    if (typeof score !== "number") {
+        return {
+            percentage: null as number | null,
+            label: "Χωρίς αξιολόγηση",
+            helper: "Δεν υπάρχουν αρκετές μετρήσεις για να βγει AQI.",
+        }
+    }
+
+    if (score <= 50) {
+        return {
+            percentage: Number(score.toFixed(1)),
+            label: "Good",
+            helper: "Ο χειρότερος ρύπος του μήνα έμεινε σε χαμηλά επίπεδα.",
+        }
+    }
+
+    if (score <= 100) {
+        return {
+            percentage: Number(score.toFixed(1)),
+            label: "Moderate",
+            helper: "Η εικόνα είναι οριακή αλλά όχι πάνω από το limit.",
+        }
+    }
+
+    if (score <= 150) {
+        return {
+            percentage: Number(score.toFixed(1)),
+            label: "Unhealthy for Sensitive Groups",
+            helper: "Κάποιος ρύπος έχει περάσει το όριο και επηρεάζει πιο ευαίσθητες ομάδες.",
+        }
+    }
+
+    if (score <= 200) {
+        return {
+            percentage: Number(score.toFixed(1)),
+            label: "Unhealthy",
+            helper: "Ο χειρότερος ρύπος είναι αρκετά πάνω από το όριο.",
+        }
+    }
+
+    if (score <= 300) {
+        return {
+            percentage: Number(score.toFixed(1)),
+            label: "Very Unhealthy",
+            helper: "Η ατμοσφαιρική επιβάρυνση είναι πολύ υψηλή.",
+        }
+    }
+
+    return {
+        percentage: Number(score.toFixed(1)),
+        label: "Hazardous",
+        helper: "Οι συγκεντρώσεις είναι εξαιρετικά υψηλές.",
+    }
+}
 
 export default function AirTab({ regionLabel, data }: Props) {
     const sortedMonths = useMemo(
@@ -60,13 +116,19 @@ export default function AirTab({ regionLabel, data }: Props) {
         [data?.months]
     )
 
-    const [selectedMonthKey, setSelectedMonthKey] = useState(data?.latestMonth.month_key ?? "")
+    const [selectedMonthKey, setSelectedMonthKey] = useState("")
+    const [isAqiModalOpen, setIsAqiModalOpen] = useState(false)
 
     useEffect(() => {
-        if (data?.latestMonth.month_key) {
-            setSelectedMonthKey(data.latestMonth.month_key)
+        if (!isAqiModalOpen) return
+
+        const previousOverflow = document.body.style.overflow
+        document.body.style.overflow = "hidden"
+
+        return () => {
+            document.body.style.overflow = previousOverflow
         }
-    }, [data?.latestMonth.month_key])
+    }, [isAqiModalOpen])
 
     if (!data || !sortedMonths.length) {
         return (
@@ -82,122 +144,131 @@ export default function AirTab({ regionLabel, data }: Props) {
         )
     }
 
-    const selectedIndex = sortedMonths.findIndex((m) => m.month_key === selectedMonthKey)
+    const effectiveMonthKey =
+        selectedMonthKey && sortedMonths.some((month) => month.month_key === selectedMonthKey)
+            ? selectedMonthKey
+            : data.latestMonth.month_key
+
+    const selectedIndex = sortedMonths.findIndex((month) => month.month_key === effectiveMonthKey)
     const safeIndex = selectedIndex >= 0 ? selectedIndex : sortedMonths.length - 1
     const selectedMonth: AirMonthConcentrations = sortedMonths[safeIndex]
     const hasPrev = safeIndex > 0
     const hasNext = safeIndex < sortedMonths.length - 1
-    const monthAqiScore = selectedMonth.aqi_score
-    const monthAqiLabel = selectedMonth.aqi_label || "No data"
+    const compliance = parseCompliance(selectedMonth.compliant_count)
+    const aqiSummary = getAqiSummary(selectedMonth.aqi_score)
+    const selectedYearlyIndex =
+        data.yearlyIndex.find((entry) => entry.year === selectedMonth.year) ?? null
 
     return (
         <div className="space-y-6">
             <div className="rounded-[1.5rem] border border-cyan-100 bg-cyan-50/60 p-6">
-                <h3 className="text-2xl font-semibold text-[#1a535c] ">Ποιότητα Αέρα - {regionLabel}</h3>
+                <h3 className="text-2xl font-semibold text-[#1a535c]">
+                    Ποιότητα Αέρα - {regionLabel}
+                </h3>
 
                 <div className="mt-5 grid gap-4 md:grid-cols-3">
                     <div className="rounded-2xl bg-white p-5 shadow-sm">
-                        <p className="text-sm font-medium text-[#1a535c]/70">Επιλεγμένο έτος</p>
-                        <p className="mt-2 text-3xl font-semibold text-cyan-700">{selectedMonth.year}</p>
+                        <p className="text-sm font-medium text-[#1a535c]/70">Συμμόρφωση μήνα</p>
+                        <p className="mt-2 text-3xl font-semibold text-cyan-700">
+                            {compliance.percentage != null ? `${compliance.percentage}%` : "-"}
+                        </p>
+                        <p className="mt-2 text-sm text-[#1a535c]/78">
+                            {compliance.compliant != null && compliance.total != null
+                                ? `${compliance.compliant} από ${compliance.total} έγκυρους ελέγχους`
+                                : "Δεν υπάρχουν αρκετά checks για ασφαλές ποσοστό."}
+                        </p>
                     </div>
 
                     <div className="rounded-2xl bg-white p-5 shadow-sm">
                         <p className="text-sm font-medium text-[#1a535c]/70">Επιλεγμένος μήνας</p>
-                        <div className="mt-2 flex items-center justify-between gap-2">
-                            <button
-                                type="button"
-                                onClick={() => hasPrev && setSelectedMonthKey(sortedMonths[safeIndex - 1].month_key)}
-                                disabled={!hasPrev}
-                                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-cyan-200 text-cyan-700 disabled:cursor-not-allowed disabled:opacity-40"
-                                aria-label="Προηγούμενος μήνας"
-                            >
-                                <ChevronLeft className="h-5 w-5" />
-                            </button>
-                            <p className="text-center text-xl font-semibold text-[#1a535c]">
-                                {selectedMonth.month_name}
-                            </p>
-                            <button
-                                type="button"
-                                onClick={() => hasNext && setSelectedMonthKey(sortedMonths[safeIndex + 1].month_key)}
-                                disabled={!hasNext}
-                                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-cyan-200 text-cyan-700 disabled:cursor-not-allowed disabled:opacity-40"
-                                aria-label="Επόμενος μήνας"
-                            >
-                                <ChevronRight className="h-5 w-5" />
-                            </button>
-                        </div>
+                        <p className="mt-2 text-2xl font-semibold text-[#1a535c]">
+                            {selectedMonth.month_name} {selectedMonth.year}
+                        </p>
+                        <span className="mt-2 inline-flex rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold tracking-wide text-cyan-800 ring-1 ring-cyan-200">
+                            ΕΤΟΣ {selectedMonth.year}
+                        </span>
                     </div>
 
                     <div className="rounded-2xl bg-white p-5 shadow-sm">
                         <p className="text-sm font-medium text-[#1a535c]/70">AQI μήνα</p>
                         <p className="mt-2 text-2xl font-semibold text-[#1a535c]">
-                            {monthAqiLabel}
-                            {typeof monthAqiScore === "number"
-                                ? ` (${monthAqiScore.toFixed(1)})`
-                                : ""}
+                            {aqiSummary.percentage != null ? aqiSummary.percentage : "-"}
                         </p>
+                        <p className="mt-2 text-sm font-medium text-cyan-800">
+                            {selectedMonth.aqi_label || "Χωρίς δεδομένα"}
+                        </p>
+                        <p className="mt-1 text-sm text-[#1a535c]/78">{aqiSummary.helper}</p>
                     </div>
                 </div>
-            </div>
 
-            <div className="rounded-[1.5rem] border border-cyan-100 bg-white p-5 shadow-sm">
-                <h4 className="text-lg font-semibold text-[#1a535c]">How Basic AQI Is Calculated</h4>
-                <p className="mt-2 text-sm leading-6 text-[#1a535c]/82">
-                    Για κάθε επιλεγμένο μήνα, το backend ελέγχει κάθε έγκυρη μέτρηση ρύπου σε σχέση
-                    με το αντίστοιχο όριο WHO.
-                </p>
-                <p className="mt-2 text-sm leading-6 text-[#1a535c]/82">
-                    Formula: <code>AQI = (compliant_checks / total_checks) * 100</code>. Όπου:
-                    <code>compliant_checks</code> = μετρήσεις εντός ορίου και{" "}
-                    <code>total_checks</code> = όλες οι έγκυρες μετρήσεις ρύπων του μήνα.
-                </p>
+                <div className="mx-auto mt-5 w-full max-w-2xl rounded-2xl border border-[#cceef2] bg-[#fbfeff] px-4 py-4 shadow-[0_18px_45px_rgba(41,146,162,0.14)]">
+                    <div className="flex flex-col items-center justify-center gap-3 text-center sm:flex-row sm:text-left">
+                        <button
+                            type="button"
+                            onClick={() => hasPrev && setSelectedMonthKey(sortedMonths[safeIndex - 1].month_key)}
+                            disabled={!hasPrev}
+                            className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#cceef2] bg-white text-[#2992a2] shadow-sm transition hover:border-[#2992a2] hover:bg-[#eefbfd] disabled:cursor-not-allowed disabled:opacity-35"
+                            aria-label="Προηγούμενος μήνας"
+                        >
+                            <ChevronLeft className="h-5 w-5" />
+                        </button>
 
-                <div className="mt-4 overflow-x-auto rounded-xl border border-cyan-100">
-                    <table className="min-w-full text-left text-sm text-[#1a535c]/88">
-                        <thead className="bg-cyan-50/70 text-xs uppercase tracking-wide text-[#1a535c]/72">
-                            <tr>
-                                <th className="px-4 py-2">Ρύπος</th>
-                                <th className="px-4 py-2">Όριο</th>
-                                <th className="px-4 py-2">Τι σημαίνει</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {AIR_EXPLANATIONS.map((row) => (
-                                <tr key={row.key} className="border-t border-cyan-100">
-                                    <td className="px-4 py-2 font-medium">{row.label}</td>
-                                    <td className="px-4 py-2">
-                                        {typeof data.limits[row.key] === "number"
-                                            ? `<= ${data.limits[row.key]} ${row.unit}`
-                                            : "-"}
-                                    </td>
-                                    <td className="px-4 py-2">{row.description}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                        <div className="min-w-0">
+                            <p className="text-sm font-semibold text-[#1a535c]">
+                                Αλλάζεις τον επιλεγμένο μήνα
+                            </p>
+                            <p className="mt-1 text-xs leading-5 text-[#1a535c]/72">
+                                Τα arrows ενημερώνουν τις κάρτες και τα διαγράμματα με τις μετρήσεις
+                                του νέου μήνα και του αντίστοιχου έτους.
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => hasNext && setSelectedMonthKey(sortedMonths[safeIndex + 1].month_key)}
+                            disabled={!hasNext}
+                            className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#cceef2] bg-white text-[#2992a2] shadow-sm transition hover:border-[#2992a2] hover:bg-[#eefbfd] disabled:cursor-not-allowed disabled:opacity-35"
+                            aria-label="Επόμενος μήνας"
+                        >
+                            <ChevronRight className="h-5 w-5" />
+                        </button>
+                    </div>
                 </div>
 
-                <p className="mt-3 text-sm leading-6 text-[#1a535c]/82">
-                    Για τον μήνα <code>{selectedMonth.month_key}</code>, το AQI βγαίνει από{" "}
-                    <code>{selectedMonth.compliant_count}</code> ελέγχοι, δηλαδή{" "}
-                    <code>
-                        {typeof monthAqiScore === "number"
-                            ? `${monthAqiScore.toFixed(1)} (${monthAqiLabel})`
-                            : "χωρίς διαθέσιμο AQI"}
-                    </code>
-                    .
-                </p>
+                <div className="mt-4 flex justify-center sm:justify-start">
+                    <button
+                        type="button"
+                        onClick={() => setIsAqiModalOpen(true)}
+                        className="inline-flex cursor-pointer items-center rounded-full border border-cyan-200 bg-white px-4 py-2 text-sm font-medium text-cyan-800 shadow-sm transition hover:border-cyan-300 hover:bg-cyan-50"
+                    >
+                        Πώς υπολογίζεται το AQI;
+                    </button>
+                </div>
             </div>
 
             <div className="grid gap-6 xl:grid-cols-2">
                 <AirLatestCard data={data} month={selectedMonth} />
-                <AirYearlyChart data={data} />
+                <AirMonthlyComplianceChart data={data} selectedYear={selectedMonth.year} />
             </div>
 
             <div className="grid gap-6 xl:grid-cols-2">
+                <AirYearlyChart data={data} />
                 <AirMonthlyStackedBar data={data} selectedYear={selectedMonth.year} />
-                <AirMonthlyComplianceChart data={data} selectedYear={selectedMonth.year} />
             </div>
+
+            <AirAqiInfoModal
+                open={isAqiModalOpen}
+                onClose={() => setIsAqiModalOpen(false)}
+                selectedMonthLabel={`${selectedMonth.month_name} ${selectedMonth.year}`}
+                selectedMonthKey={selectedMonth.month_key}
+                monthAqiScore={selectedMonth.aqi_score}
+                monthAqiLabel={selectedMonth.aqi_label || "No data"}
+                monthPollutantIndices={selectedMonth.pollutant_indices}
+                monthDominantPollutant={selectedMonth.dominant_pollutant}
+                yearAqiScore={selectedYearlyIndex?.aqi_score ?? null}
+                yearAqiLabel={selectedYearlyIndex?.aqi_label ?? null}
+                yearDominantPollutant={selectedYearlyIndex?.dominant_pollutant ?? null}
+            />
         </div>
     )
 }

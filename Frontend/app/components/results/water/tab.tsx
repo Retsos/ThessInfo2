@@ -129,7 +129,7 @@ export default function WaterTab({ regionLabel, water }: Props) {
 
                 <div className="mt-5 grid gap-4 md:grid-cols-3">
                     <div className="rounded-2xl bg-white p-5 shadow-sm">
-                        <p className="text-sm font-medium text-[#1a535c]/70">Συμμόρφωση</p>
+                        <p className="text-sm font-medium text-[#1a535c]/70">Συμμόρφωση/Ανά Χρόνο</p>
                         <p className="mt-2 text-3xl font-semibold text-sky-700">
                             {quality.percentage ?? "-"}%
                         </p>
@@ -149,7 +149,7 @@ export default function WaterTab({ regionLabel, water }: Props) {
                     </div>
 
                     <div className="rounded-2xl bg-white p-5 shadow-sm">
-                        <p className="text-sm font-medium text-[#1a535c]/70">Συνολικό WQI</p>
+                        <p className="text-sm font-medium text-[#1a535c]/70">Συνολικό WQI/Ανά Χρόνο</p>
                         <p className="mt-2 text-2xl font-semibold text-[#1a535c]">
                             {overallWqi?.overall_wqi?.score?.toFixed(2) ?? "-"}
                         </p>

@@ -24,13 +24,17 @@ POLLUTANTS = tuple(POLLUTANT_LIMITS.keys())
 def _aqi_label(score: float | None) -> str:
     if score is None:
         return "No data"
-    if score >= 90:
-        return "Excellent"
-    if score >= 75:
+    if score <= 50:
         return "Good"
-    if score >= 50:
+    if score <= 100:
         return "Moderate"
-    return "Poor"
+    if score <= 150:
+        return "Unhealthy for Sensitive Groups"
+    if score <= 200:
+        return "Unhealthy"
+    if score <= 300:
+        return "Very Unhealthy"
+    return "Hazardous"
 
 
 def _safe_float(value: Any) -> float | None:
@@ -54,6 +58,30 @@ def _normalize_pollutant_value(pollutant: str, raw_value: Any) -> float | None:
 
     return value
 
+
+def _calculate_pollutant_indices(
+    averages: dict[str, float | None]
+) -> tuple[dict[str, float | None], float | None, str | None]:
+    pollutant_indices: dict[str, float | None] = {}
+    dominant_pollutant: str | None = None
+    max_index: float | None = None
+
+    for pollutant in POLLUTANTS:
+        value = averages.get(pollutant)
+        limit = POLLUTANT_LIMITS[pollutant]
+
+        if value is None:
+            pollutant_indices[pollutant] = None
+            continue
+
+        pollutant_index = round((value / limit) * 100, 2)
+        pollutant_indices[pollutant] = pollutant_index
+
+        if max_index is None or pollutant_index > max_index:
+            max_index = pollutant_index
+            dominant_pollutant = pollutant
+
+    return pollutant_indices, max_index, dominant_pollutant
 
 @lru_cache(maxsize=1)
 def _build_aggregates() -> dict[str, Any]:
@@ -149,7 +177,7 @@ def _month_payload(area: str, year: int, month: int, stats: dict[str, Any]) -> d
 
     total_checks = stats["total_checks"]
     compliant_checks = stats["compliant_checks"]
-    aqi_score = round((compliant_checks / total_checks) * 100, 2) if total_checks else None
+    pollutant_indices, aqi_score, dominant_pollutant = _calculate_pollutant_indices(averages)
 
     return {
         "area": area,
@@ -160,6 +188,8 @@ def _month_payload(area: str, year: int, month: int, stats: dict[str, Any]) -> d
         "limits": POLLUTANT_LIMITS,
         "averages": averages,
         "compliant_count": f"{compliant_checks}/{total_checks}",
+        "pollutant_indices": pollutant_indices,
+        "dominant_pollutant": dominant_pollutant,
         "aqi_score": aqi_score,
         "aqi_label": _aqi_label(aqi_score),
         "records_count": stats["records_count"],
@@ -244,23 +274,48 @@ def get_yearly_air_quality_index(area: str) -> dict[str, Any]:
 
     monthly = _build_aggregates()["monthly_stats"].get(area_key, {})
 
-    year_totals: dict[int, dict[str, int]] = defaultdict(lambda: {"checks": 0, "compliant": 0})
+    year_totals: dict[int, dict[str, Any]] = defaultdict(
+        lambda: {
+            "checks": 0,
+            "compliant": 0,
+            "pollutant_totals": defaultdict(float),
+            "pollutant_counts": defaultdict(int),
+        }
+    )
 
     for (year, _month), stats in monthly.items():
         year_totals[year]["checks"] += stats["total_checks"]
         year_totals[year]["compliant"] += stats["compliant_checks"]
+        for pollutant in POLLUTANTS:
+            count = stats["counts"].get(pollutant, 0)
+            if not count:
+                continue
+            year_totals[year]["pollutant_totals"][pollutant] += stats["totals"][pollutant]
+            year_totals[year]["pollutant_counts"][pollutant] += count
 
     rows = []
     for year in sorted(year_totals.keys()):
         checks = year_totals[year]["checks"]
         compliant = year_totals[year]["compliant"]
-        aqi_score = round((compliant / checks) * 100, 2) if checks else None
+        yearly_averages: dict[str, float | None] = {}
+        for pollutant in POLLUTANTS:
+            count = year_totals[year]["pollutant_counts"].get(pollutant, 0)
+            if count:
+                yearly_averages[pollutant] = round(
+                    year_totals[year]["pollutant_totals"][pollutant] / count, 4
+                )
+            else:
+                yearly_averages[pollutant] = None
+
+        pollutant_indices, aqi_score, dominant_pollutant = _calculate_pollutant_indices(yearly_averages)
         rows.append(
             {
                 "year": year,
                 "aqi_score": aqi_score,
                 "aqi_label": _aqi_label(aqi_score),
                 "compliant_count": f"{compliant}/{checks}",
+                "pollutant_indices": pollutant_indices,
+                "dominant_pollutant": dominant_pollutant,
             }
         )
 

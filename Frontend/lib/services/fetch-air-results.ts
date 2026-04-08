@@ -20,10 +20,12 @@ const MAX_AIR_MONTHS = 300
 
 function scoreToLabel(score: number | null): string {
     if (typeof score !== "number") return "No data"
-    if (score >= 90) return "Excellent"
-    if (score >= 75) return "Good"
-    if (score >= 50) return "Moderate"
-    return "Poor"
+    if (score <= 50) return "Good"
+    if (score <= 100) return "Moderate"
+    if (score <= 150) return "Unhealthy for Sensitive Groups"
+    if (score <= 200) return "Unhealthy"
+    if (score <= 300) return "Very Unhealthy"
+    return "Hazardous"
 }
 
 function normalizeMonthRow(row: AirMonthConcentrations): AirMonthConcentrations {

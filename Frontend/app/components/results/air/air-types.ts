@@ -1,5 +1,6 @@
-﻿export type AirLimits = Record<string, number>
+export type AirLimits = Record<string, number>
 export type AirAverages = Record<string, number | null>
+export type AirPollutantIndices = Record<string, number | null>
 
 export type AirMonthConcentrations = {
     area: string
@@ -10,6 +11,8 @@ export type AirMonthConcentrations = {
     limits: AirLimits
     averages: AirAverages
     compliant_count: string
+    pollutant_indices?: AirPollutantIndices
+    dominant_pollutant?: string | null
     aqi_score: number | null
     aqi_label: string
     records_count: number
@@ -26,6 +29,8 @@ export type AirMonthlyIndexEntry = {
     aqi_score: number | null
     aqi_label: string
     compliant_count: string
+    pollutant_indices?: AirPollutantIndices
+    dominant_pollutant?: string | null
 }
 
 export type AirYearlyIndexEntry = {
@@ -33,6 +38,8 @@ export type AirYearlyIndexEntry = {
     aqi_score: number | null
     aqi_label: string
     compliant_count: string
+    pollutant_indices?: AirPollutantIndices
+    dominant_pollutant?: string | null
 }
 
 export type AirResultsData = {
