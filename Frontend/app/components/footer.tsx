@@ -9,9 +9,9 @@ const mainLinks = [
 ]
 
 const topicLinks = [
-    { href: "/ArrayMapSection/1/Water", label: "Ποιότητα Νερού", icon: Droplets },
-    { href: "/ArrayMapSection/1/Air", label: "Ποιότητα Αέρα", icon: Wind },
-    { href: "/ArrayMapSection/1/Recycle", label: "Ανακύκλωση", icon: Recycle },
+    { href: "/themes/water", label: "Ποιότητα Νερού", icon: Droplets },
+    { href: "/themes/air", label: "Ποιότητα Αέρα", icon: Wind },
+    { href: "/themes/recycle", label: "Ανακύκλωση", icon: Recycle },
 ]
 
 export function Footer() {
@@ -34,8 +34,8 @@ export function Footer() {
                         </h3>
 
                         <p className="mt-4 text-sm leading-7 text-[#1a535c]/80">
-                            Καθαρή παρουσίαση δεδομένων για αέρα, νερό και ανακύκλωση, με
-                            τοπικό προσανατολισμό και πιο ήρεμη αισθητική. 
+                            Καθαρή παρουσίαση δεδομένων για αέρα, νερό και ανακύκλωση, με τοπικό προσανατολισμό και
+                            πιο ήρεμη αισθητική.
                         </p>
                     </div>
 
@@ -90,22 +90,13 @@ export function Footer() {
                         <p>© {year} ThessInfo. Με επίκεντρο τη Θεσσαλονίκη και την ουσία.</p>
 
                         <div className="flex flex-wrap items-center gap-4">
-                            <Link
-                                href="/about"
-                                className="transition-colors hover:text-[#006264]"
-                            >
+                            <Link href="/about" className="transition-colors hover:text-[#006264]">
                                 Σχετικά
                             </Link>
-                            <Link
-                                href="/contact"
-                                className="transition-colors hover:text-[#006264]"
-                            >
+                            <Link href="/contact" className="transition-colors hover:text-[#006264]">
                                 Επικοινωνία
                             </Link>
-                            <Link
-                                href="/LearnMore"
-                                className="transition-colors hover:text-[#006264]"
-                            >
+                            <Link href="/learn-more" className="transition-colors hover:text-[#006264]">
                                 Μάθε περισσότερα
                             </Link>
                         </div>
