@@ -28,7 +28,7 @@ export const featureCards: FeatureCardItem[] = [
         title: "Έλεγχος Ποιότητας Νερού",
         description:
             "Άμεση ενημέρωση για pH, χλώριο και βασικούς δείκτες, με στόχο καθαρό και ασφαλές νερό.",
-        href: "/ArrayMapSection/1/Water",
+        href: "/themes/water",
         icon: Droplets,
         eyebrow: "Νερό",
         theme: "water",
@@ -37,7 +37,7 @@ export const featureCards: FeatureCardItem[] = [
         title: "Διαχείριση Απορριμμάτων",
         description:
             "Ανακύκλωση, διαλογή και πιο πρακτική περιβαλλοντική οργάνωση για την καθημερινότητα της πόλης.",
-        href: "/ArrayMapSection/1/Recycle",
+        href: "/themes/recycle",
         icon: Recycle,
         eyebrow: "Ανακύκλωση",
         theme: "recycle",
@@ -46,7 +46,7 @@ export const featureCards: FeatureCardItem[] = [
         title: "Ατμοσφαιρική Ρύπανση",
         description:
             "Παρακολούθηση δεικτών PM2.5, NO₂ και O₃ με καθαρή παρουσίαση και γρήγορη κατανόηση.",
-        href: "/ArrayMapSection/1/Air",
+        href: "/themes/air",
         icon: Wind,
         eyebrow: "Αέρας",
         theme: "air",

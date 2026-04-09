@@ -42,10 +42,10 @@ export function HeroSection() {
 
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
-              href="#sections"
+              href="/services"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-[#006264] shadow-lg shadow-black/10 transition-all hover:-translate-y-0.5 hover:bg-[#f1fafa]"
             >
-              Εξερεύνηση θεματικών
+              Αναζήτηση περιοχής
               <ArrowRight className="h-4 w-4" />
             </Link>
 
