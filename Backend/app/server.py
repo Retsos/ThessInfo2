@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from app.waterdata.routes import router as water_router
 from app.airquality.routes import router as air_router
 from app.recycle.routes import router as recycle_router
+from app.sharedqi_routes import router as sharedqi_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -25,6 +26,7 @@ app.add_middleware(
 app.include_router(water_router)
 app.include_router(air_router)
 app.include_router(recycle_router)
+app.include_router(sharedqi_router)
 
 @app.get("/")
 def read_root():

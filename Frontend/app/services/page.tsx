@@ -3,7 +3,6 @@ import RegionSearch from "./../components/services/region-search"
 import ServicesOverview from "./../components/services/ServicesOverview"
 import ServicesSteps from "./../components/services/ServicesSteps"
 import ServicesBestMocks from "./../components/services/ServicesBestMocks"
-import ServicesCTA from "./../components/services/ServicesCTA"
 
 export default function ServicesPage() {
     return (
@@ -21,7 +20,6 @@ export default function ServicesPage() {
             <ServicesOverview />
             <ServicesSteps />
             <ServicesBestMocks />
-            <ServicesCTA />
         </div>
     )
 }
