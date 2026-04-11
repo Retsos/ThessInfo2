@@ -1,13 +1,16 @@
 "use client"
 
 import dynamic from "next/dynamic"
+import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import type { QualityBand } from "@/lib/quality-indexes"
 import airApi from "@/lib/api2"
 import type { MapAreaRow } from "../components/map/environment-map"
 import { resolveBand } from "../components/map/compute-score"
-import { InfoModal } from "./_components/info-modal"
+import EqiInfoModal from "./_components/eqi-info-modal"
+import AqiInfoModal from "./_components/aqi-info-modal"
+import WqiInfoModal from "./_components/wqi-info-modal"
 import { MetricSwitcher } from "./_components/metric-switcher"
 import { MapSidebar } from "./_components/map-sidebar"
 import { metricConfigs, metricModalContent } from "./map-metrics"
@@ -45,14 +48,76 @@ function driverByMetric(item: SharedAreaPayload, metric: MetricKey): string | nu
 }
 
 const AIR_AREA_ALIASES: Record<string, string[]> = {
-  Ampelokipoi: ["Ampelokipoi Municipality"],
-  Kalamaria: ["Kalamaria Municipality"],
-  Oraiokastro: ["Oreokastro Municipality", "Oraiokastro Municipality"],
-  Pulaia: ["Pylaia Municipality", "Pulaia Municipality"],
-  Thessaloniki: ["Thessaloniki Municipality"],
-  Kordelio: ["Kordelio Municipality", "Evosmos Municipality", "Kordelio-Evosmos Municipality"],
-  Pavlou_Mela: ["Pavlou Mela Municipality"],
-  Neapoli: ["Neapoli Municipality", "Neapolis-Sykeon Municipality"],
+  Ampelokipoi: [
+    "Ampelokipoi Municipality",
+    "Ampelokipi - Menemeni Municipality",
+    "Δήμος Αμπελοκήπων - Μενεμένης",
+  ],
+  Chalkidonos: [
+    "Chalkidona Municipality",
+    "Δήμος Χαλκηδόνας",
+  ],
+  Delta: [
+    "Delta Municipality",
+    "Δήμος Δέλτα",
+  ],
+  Kalamaria: [
+    "Kalamaria Municipality",
+    "Δήμος Καλαμαριάς",
+  ],
+  Kordelio: [
+    "Kordelio Municipality",
+    "Evosmos Municipality",
+    "Kordelio-Evosmos Municipality",
+    "Kordelio - Evosmos Municipality",
+    "Δήμος Κορδελιού - Ευόσμου",
+  ],
+  Lagkadas: [
+    "Lagkadas Municipality",
+    "Municipality of Lagadas",
+    "Lagadas",
+    "Δήμος Λαγκαδά",
+  ],
+  Neapoli: [
+    "Neapoli Municipality",
+    "Neapolis-Sykeon Municipality",
+    "Municipality of Neapoli-Sykies",
+    "Δήμος Νεάπολης - Συκεών",
+  ],
+  Oraiokastro: [
+    "Oreokastro Municipality",
+    "Oraiokastro Municipality",
+    "Δήμος Ωραιοκάστρου",
+  ],
+  Pavlou_Mela: [
+    "Pavlou Mela Municipality",
+    "Pavlos Melas Municipality",
+    "Δήμος Παύλου Μελά",
+  ],
+  Pulaia: [
+    "Pylaia Municipality",
+    "Pulaia Municipality",
+    "Municipality of Pylaia - Chortiatis",
+    "Pylaia - Chortiatis",
+    "Δήμος Πυλαίας - Χορτιάτη",
+  ],
+  Thermaikos: [
+    "Thermaikos Municipality",
+    "Δήμος Θερμαϊκού",
+  ],
+  Thermi: [
+    "Thermi Municipality",
+    "Δήμος Θέρμης",
+  ],
+  Thessaloniki: [
+    "Thessaloniki Municipality",
+    "Municipality of Thessaloniki",
+    "Δήμος Θεσσαλονίκης",
+  ],
+  Volvi: [
+    "Volvi Municipality",
+    "Δήμος Βόλβης",
+  ],
 }
 
 type AirAreasResponse = { areas?: string[] }
@@ -78,6 +143,12 @@ export default function MapPageClient() {
   const [selected, setSelected] = useState<AreaSelection | null>(null)
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false)
   const [dataVersion, setDataVersion] = useState(0)
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = isInfoModalOpen ? "hidden" : ""
+    return () => { document.body.style.overflow = "" }
+  }, [isInfoModalOpen])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -235,14 +306,33 @@ export default function MapPageClient() {
 
           <MapSidebar indexCode={config.indexCode} legend={config.legend} selected={selected} selectedBandLabel={selectedBandLabel} />
         </div>
+        {/* Leaderboards CTA */}
+        <Link
+          href="/leaderboard"
+          className="group mt-6 flex items-center justify-between rounded-3xl border border-[#d7eff0] bg-white p-5 shadow-sm transition hover:border-[#1daaad]/40 hover:shadow-md md:p-6"
+        >
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-2xl shadow-sm">
+              🏆
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-[#1a535c] group-hover:text-[#1daaad] transition">
+                Leaderboards Περιοχών
+              </h3>
+              <p className="text-sm text-[#1a535c]/65">
+                Δες ποιες περιοχές έχουν την καλύτερη & χειρότερη ποιότητα αέρα, νερού και συνολικά.
+              </p>
+            </div>
+          </div>
+          <span className="mr-1 text-xl text-[#1a535c]/40 transition group-hover:translate-x-1 group-hover:text-[#1daaad]">
+            →
+          </span>
+        </Link>
       </section>
 
-      <InfoModal
-        open={isInfoModalOpen}
-        title={modalContent.title}
-        body={modalContent.placeholder}
-        onClose={() => setIsInfoModalOpen(false)}
-      />
+      <EqiInfoModal open={isInfoModalOpen && activeMetric === "overall"} onClose={() => setIsInfoModalOpen(false)} />
+      <AqiInfoModal open={isInfoModalOpen && activeMetric === "air"} onClose={() => setIsInfoModalOpen(false)} />
+      <WqiInfoModal open={isInfoModalOpen && activeMetric === "water"} onClose={() => setIsInfoModalOpen(false)} />
     </div>
   )
 }

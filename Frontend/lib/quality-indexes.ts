@@ -19,27 +19,27 @@ export type QualityIndexScale = {
 
 export const EQI_BANDS: QualityBand[] = [
   {
-    min: 80,
+    min: 90,
     max: 100,
-    label: "80-100 Excellent",
+    label: "90-100 Εξαιρετική",
     color: "#0f766e",
     bgClass: "bg-teal-50",
     textClass: "text-teal-800",
     borderClass: "border-teal-200",
   },
   {
-    min: 60,
-    max: 79.99,
-    label: "60-79 Good",
+    min: 75,
+    max: 89.99,
+    label: "75-89 Καλή",
     color: "#22c55e",
     bgClass: "bg-emerald-50",
     textClass: "text-emerald-800",
     borderClass: "border-emerald-200",
   },
   {
-    min: 40,
-    max: 59.99,
-    label: "40-59 Moderate",
+    min: 50,
+    max: 74.99,
+    label: "50-74 Μέτρια",
     color: "#f59e0b",
     bgClass: "bg-amber-50",
     textClass: "text-amber-800",
@@ -47,8 +47,8 @@ export const EQI_BANDS: QualityBand[] = [
   },
   {
     min: 0,
-    max: 39.99,
-    label: "0-39 Poor",
+    max: 49.99,
+    label: "0-49 Φτωχή",
     color: "#ef4444",
     bgClass: "bg-rose-50",
     textClass: "text-rose-800",
@@ -60,7 +60,7 @@ export const AQI_BANDS: QualityBand[] = [
   {
     min: 0,
     max: 50,
-    label: "AQI 0-50 Good",
+    label: "0-50 Καλή",
     color: "#16a34a",
     bgClass: "bg-emerald-50",
     textClass: "text-emerald-800",
@@ -69,7 +69,7 @@ export const AQI_BANDS: QualityBand[] = [
   {
     min: 51,
     max: 100,
-    label: "AQI 51-100 Moderate",
+    label: "51-100 Μέτρια",
     color: "#facc15",
     bgClass: "bg-yellow-50",
     textClass: "text-yellow-800",
@@ -78,7 +78,7 @@ export const AQI_BANDS: QualityBand[] = [
   {
     min: 101,
     max: 150,
-    label: "AQI 101-150 Unhealthy for Sensitive Groups",
+    label: "101-150 Ανθυγιεινή για ευαίσθητες ομάδες",
     color: "#f59e0b",
     bgClass: "bg-amber-50",
     textClass: "text-amber-800",
@@ -87,7 +87,7 @@ export const AQI_BANDS: QualityBand[] = [
   {
     min: 151,
     max: 200,
-    label: "AQI 151-200 Unhealthy",
+    label: "151-200 Ανθυγιεινή",
     color: "#ef4444",
     bgClass: "bg-rose-50",
     textClass: "text-rose-800",
@@ -96,7 +96,7 @@ export const AQI_BANDS: QualityBand[] = [
   {
     min: 201,
     max: 300,
-    label: "AQI 201-300 Very Unhealthy",
+    label: "201-300 Πολύ ανθυγιεινή",
     color: "#a855f7",
     bgClass: "bg-purple-50",
     textClass: "text-purple-800",
@@ -105,7 +105,7 @@ export const AQI_BANDS: QualityBand[] = [
   {
     min: 301,
     max: 500,
-    label: "AQI 301-500 Hazardous",
+    label: "301-500 Επικίνδυνη",
     color: "#7f1d1d",
     bgClass: "bg-red-100",
     textClass: "text-red-900",
@@ -117,7 +117,7 @@ export const WQI_BANDS: QualityBand[] = [
   {
     min: 0,
     max: 25,
-    label: "WQI 0-25 Excellent",
+    label: "0-25 Εξαιρετική",
     color: "#16a34a",
     bgClass: "bg-emerald-50",
     textClass: "text-emerald-800",
@@ -126,7 +126,7 @@ export const WQI_BANDS: QualityBand[] = [
   {
     min: 26,
     max: 50,
-    label: "WQI 26-50 Good",
+    label: "26-50 Καλή",
     color: "#22c55e",
     bgClass: "bg-green-50",
     textClass: "text-green-800",
@@ -135,7 +135,7 @@ export const WQI_BANDS: QualityBand[] = [
   {
     min: 51,
     max: 75,
-    label: "WQI 51-75 Moderate",
+    label: "51-75 Μέτρια",
     color: "#f59e0b",
     bgClass: "bg-amber-50",
     textClass: "text-amber-800",
@@ -144,7 +144,7 @@ export const WQI_BANDS: QualityBand[] = [
   {
     min: 76,
     max: 100,
-    label: "WQI 76-100 Poor",
+    label: "76-100 Κακή",
     color: "#f97316",
     bgClass: "bg-orange-50",
     textClass: "text-orange-800",
@@ -153,7 +153,7 @@ export const WQI_BANDS: QualityBand[] = [
   {
     min: 101,
     max: 1000,
-    label: "WQI >100 Unsuitable",
+    label: ">100 Ακατάλληλο",
     color: "#b91c1c",
     bgClass: "bg-rose-50",
     textClass: "text-rose-800",

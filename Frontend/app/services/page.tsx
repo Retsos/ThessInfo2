@@ -2,7 +2,6 @@ import ServicesHero from "./../components/services/ServicesHero"
 import RegionSearch from "./../components/services/region-search"
 import ServicesOverview from "./../components/services/ServicesOverview"
 import ServicesSteps from "./../components/services/ServicesSteps"
-import ServicesBestMocks from "./../components/services/ServicesBestMocks"
 
 export default function ServicesPage() {
     return (
@@ -13,13 +12,12 @@ export default function ServicesPage() {
                 <RegionSearch />
 
                 <div className="mt-4 rounded-2xl border border-[#d7eff0] bg-white/85 px-4 py-3 text-sm text-[#1a535c]/80 shadow-sm">
-                    Γρήγορη είσοδος στα δεδομένα της περιοχής σου. 
+                    Γρήγορη είσοδος στα δεδομένα της περιοχής σου.
                 </div>
             </section>
 
             <ServicesOverview />
             <ServicesSteps />
-            <ServicesBestMocks />
         </div>
     )
 }

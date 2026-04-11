@@ -13,24 +13,121 @@ router = APIRouter(prefix="/sharedqi", tags=["Shared QI"])
 
 WATER_AREA_BY_AIR_AREA: dict[str, str] = {
     "Ampelokipoi": "ampelokipoi",
+    "Delta": "bipeth",
     "Kalamaria": "kalamaria",
-    "Oraiokastro": "oraiokastro",
+    "Kordelio": "euosmos",
+    "Neapoli": "agios_paulos",
+    "Oraiokastro": "Oraiokastro",
+    "Pavlou_Mela": "eykarpia",
     "Pulaia": "pylaia",
     "Thessaloniki": "kentro_polis",
-    "Kordelio": "euosmos",
-    "Pavlou_Mela": "xirokrini",
-    "Neapoli": "triandria",
 }
 
 AREA_ALIASES: dict[str, list[str]] = {
-    "Ampelokipoi": ["Ampelokipoi Municipality"],
-    "Kalamaria": ["Kalamaria Municipality"],
-    "Oraiokastro": ["Oreokastro Municipality", "Oraiokastro Municipality"],
-    "Pulaia": ["Pylaia Municipality", "Pulaia Municipality"],
-    "Thessaloniki": ["Thessaloniki Municipality"],
-    "Kordelio": ["Kordelio Municipality", "Evosmos Municipality", "Kordelio-Evosmos Municipality"],
-    "Pavlou_Mela": ["Pavlou Mela Municipality"],
-    "Neapoli": ["Neapoli Municipality", "Neapolis-Sykeon Municipality"],
+    "Ampelokipoi": [
+        "Ampelokipoi Municipality",
+        "Ampelokipi - Menemeni Municipality",
+        "Δήμος Αμπελοκήπων - Μενεμένης",
+        "ampelokipoi",
+    ],
+    "Chalkidonos": [
+        "Chalkidona Municipality",
+        "Δήμος Χαλκηδόνας",
+        "Δήμος Χαλκιδόνος",
+    ],
+    "Delta": [
+        "Delta Municipality",
+        "Δήμος Δέλτα",
+        "bipeth",
+    ],
+    "Kalamaria": [
+        "Kalamaria Municipality",
+        "Δήμος Καλαμαριάς",
+        "kalamaria",
+    ],
+    "Kordelio": [
+        "Kordelio Municipality",
+        "Evosmos Municipality",
+        "Kordelio-Evosmos Municipality",
+        "Kordelio - Evosmos Municipality",
+        "Δήμος Κορδελιού - Ευόσμου",
+        "euosmos",
+        "Κορδελιό",
+    ],
+    "Lagkadas": [
+        "Lagkadas Municipality",
+        "Municipality of Lagadas",
+        "Lagadas",
+        "Δήμος Λαγκαδά",
+        "Λαγκαδάς",
+    ],
+    "Neapoli": [
+        "Neapoli Municipality",
+        "Neapolis-Sykeon Municipality",
+        "Municipality of Neapoli-Sykies",
+        "Δήμος Νεάπολης - Συκεών",
+        "agios_paulos",
+        "neapoli-sykies",
+    ],
+    "Oraiokastro": [
+        "Oreokastro Municipality",
+        "Oraiokastro Municipality",
+        "Δήμος Ωραιοκάστρου",
+        "Oraiokastro",
+    ],
+    "Pavlou_Mela": [
+        "Pavlou Mela Municipality",
+        "Pavlos Melas Municipality",
+        "Δήμος Παύλου Μελά",
+        "eykarpia",
+        "Παύλου Μελά",
+    ],
+    "Pulaia": [
+        "Pylaia Municipality",
+        "Pulaia Municipality",
+        "Municipality of Pylaia - Chortiatis",
+        "Pylaia - Chortiatis",
+        "Δήμος Πυλαίας - Χορτιάτη",
+        "konstantinoypolitika",
+        "pylaia",
+        "pylaia_ikea",
+    ],
+    "Thermaikos": [
+        "Thermaikos Municipality",
+        "Δήμος Θερμαϊκού",
+        "ΘΕΡΜΑΪΚΟΣ",
+    ],
+    "Thermi": [
+        "Thermi Municipality",
+        "Δήμος Θέρμης",
+        "Θέρμη",
+    ],
+    "Thessaloniki": [
+        "Thessaloniki Municipality",
+        "Municipality of Thessaloniki",
+        "Δήμος Θεσσαλονίκης",
+        "40ekklisies",
+        "analipsi",
+        "ano_poli",
+        "ano_toympa",
+        "deth-hanth",
+        "kato_toympa",
+        "kentro_polis",
+        "nea_paralia",
+        "ntepo",
+        "panagia_faneromeni",
+        "plateia_dimokratias",
+        "sfageia",
+        "sholi_tyflon",
+        "triandria",
+        "xirokrini",
+        "harilaoy",
+    ],
+    "Volvi": [
+        "Volvi Municipality",
+        "Δήμος Βόλβης",
+        "Κέντρο Βόλβης",
+    ],
 }
 
 
@@ -162,7 +259,7 @@ def shared_qi_areas() -> dict[str, Any]:
                 "eqi_display": eqi.eqi_display,
                 "band": eqi.band,
             }
-            dominant_factor = "air" if eqi.air_norm >= eqi.water_norm else "water"
+            dominant_factor = eqi.dominant_factor
         elif air_raw is not None:
             dominant_factor = "air"
         elif water_raw is not None:

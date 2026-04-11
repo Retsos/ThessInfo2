@@ -12,6 +12,13 @@ export type SharedAreaPayload = {
     eqi: { eqi_raw: number | null; eqi_display: number | null; band: string | null }
   }
   dominant_factor: string | null
+  sources?: {
+    air_area: string | null
+    water_area: string | null
+    air_month: string | null
+    water_month: string | null
+    common_month: string | null
+  }
 }
 
 export type MetricConfig = {

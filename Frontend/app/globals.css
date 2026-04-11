@@ -127,3 +127,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Leaflet z-index containment — creates a stacking context so that
+   internal Leaflet z-indexes (400-1000) don't bleed over modals (z-50). */
+.leaflet-container {
+  z-index: 0;
+  isolation: isolate;
+}
