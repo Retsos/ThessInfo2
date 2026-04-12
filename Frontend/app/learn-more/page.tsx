@@ -1,4 +1,10 @@
+import type { Metadata } from 'next'
 import { LearnMoreCTA } from "./../components/learn-more/learn-more-cta"
+
+export const metadata: Metadata = {
+  title: 'Μάθε περισσότερα',
+}
+
 import { LearnMoreFAQ } from "./../components/learn-more/learn-more-faq"
 import { LearnMoreHero } from "./../components/learn-more/learn-more-hero"
 import { LearnMoreHighlights } from "./../components/learn-more/learn-more-highlights"

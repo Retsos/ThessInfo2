@@ -1,5 +1,11 @@
+import type { Metadata } from 'next'
 import ServicesHero from "./../components/services/ServicesHero"
 import RegionSearch from "./../components/services/region-search"
+
+export const metadata: Metadata = {
+  title: 'Υπηρεσίες',
+}
+
 import ServicesOverview from "./../components/services/ServicesOverview"
 import ServicesSteps from "./../components/services/ServicesSteps"
 

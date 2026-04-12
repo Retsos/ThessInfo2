@@ -1,5 +1,11 @@
+import type { Metadata } from 'next'
 import Link from "next/link"
 import { ArrowRight, Database, MapPinned, Waves, Wind } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: 'Σχετικά',
+}
+
 
 const pillars = [
     {

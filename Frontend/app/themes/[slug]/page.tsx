@@ -17,6 +17,21 @@ function isThemeSlug(value: string): value is ThemeSlug {
     return value in themePages
 }
 
+export async function generateMetadata({ params }: Props): Promise<import("next").Metadata> {
+    const { slug } = await params
+    const decodedSlug = decodeURIComponent(slug)
+
+    if (isThemeSlug(decodedSlug)) {
+        return {
+            title: themePages[decodedSlug].title,
+        }
+    }
+
+    return {
+        title: "Θεματική Ενότητα",
+    }
+}
+
 export default async function ThemePage({ params }: Props) {
     const { slug } = await params
     const decodedSlug = decodeURIComponent(slug)

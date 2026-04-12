@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from "next/font/google"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -5,6 +6,14 @@ import { Navbar } from "./components/navbar"
 import { cn } from "@/lib/utils"
 import "./globals.css"
 import { Footer } from "./components/footer"
+
+export const metadata: Metadata = {
+  title: {
+    template: '%s | ThessInfo',
+    default: 'ThessInfo - Περιβαλλοντικά Δεδομένα',
+  },
+  description: 'Πλατφόρμα παρακολούθησης των περιβαλλοντικών δεδομένων της Θεσσαλονίκης',
+}
 
 const geist = Geist({
   subsets: ["latin"],

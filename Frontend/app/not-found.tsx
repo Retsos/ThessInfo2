@@ -1,5 +1,11 @@
+import type { Metadata } from 'next'
 import Link from "next/link"
 import { MapPin } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: 'Σφάλμα 404',
+}
+
 
 export default function NotFound() {
     return (
