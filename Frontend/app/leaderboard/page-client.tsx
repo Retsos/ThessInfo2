@@ -217,7 +217,7 @@ export default function LeaderboardPage() {
         {/* Metric switcher */}
         <div className="rounded-3xl border border-[#d7eff0] bg-white/90 p-5 shadow-sm md:p-6">
           <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#1daaad]">Επιλογή κατάταξης</p>
-          <div className="mt-4 flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-nowrap overflow-x-auto pb-2 gap-3 -mx-2 px-2 scrollbar-none sm:flex-wrap sm:overflow-visible sm:pb-0" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
             {metricOptions.map((option) => {
               const Icon = option.icon
               const isActive = option.key === activeMetric

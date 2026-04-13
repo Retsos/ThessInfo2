@@ -6,6 +6,7 @@ import { Navbar } from "./components/navbar"
 import { cn } from "@/lib/utils"
 import "./globals.css"
 import { Footer } from "./components/footer"
+import { ScrollToTop } from "@/components/scroll-to-top"
 
 export const metadata: Metadata = {
   title: {
@@ -43,6 +44,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-background font-sans text-foreground">
         <ThemeProvider>
           <TooltipProvider>
+            <ScrollToTop />
             <Navbar />
             <main className="min-h-[calc(100vh-4rem)]">{children}</main>
             <Footer />
