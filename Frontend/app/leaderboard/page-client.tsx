@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
-import { Droplets, Medal, Wind } from "lucide-react"
+import { Droplets, Medal, Recycle, Wind } from "lucide-react"
 import {
   AQI_BANDS,
   EQI_BANDS,
@@ -11,10 +11,15 @@ import {
   getBandForScore,
   type QualityBand,
 } from "@/lib/quality-indexes"
+import type {
+  RecycleCompareEntry,
+  RecycleEfficiencyResponse,
+} from "@/app/components/results/recycle/recycle-types"
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type MetricKey = "overall" | "air" | "water"
+type MetricKey = "overall" | "air" | "water" | "recycle"
+type RecycleSubMode = "per_capita" | "efficiency"
 
 type SharedAreaPayload = {
   area: string
@@ -51,6 +56,11 @@ const AREA_LABELS: Record<string, string> = {
   Thermi: "Θέρμη",
   Thessaloniki: "Θεσσαλονίκη",
   Volvi: "Βόλβη",
+  // Recycling area names (Greek)
+  "ΘΕΡΜΗ": "Θέρμη",
+  "ΚΑΛΑΜΑΡΙΑ": "Καλαμαριά",
+  "ΠΥΛΑΙΑ-ΧΟΡΤΙΑΤΗΣ": "Πυλαία-Χορτιάτης",
+  "ΘΕΡΜΑΪΚΟΣ": "Θερμαϊκός",
 }
 
 const DOMINANT_LABELS: Record<string, string> = {
@@ -58,18 +68,36 @@ const DOMINANT_LABELS: Record<string, string> = {
   water: "Νερό",
 }
 
+// ── Recycling Bands ──────────────────────────────────────────────────────────
+
+const RECYCLE_PER_CAPITA_BANDS: QualityBand[] = [
+  { min: 5, max: 100, label: ">5.0 Εξαιρετική", color: "#15803d", bgClass: "bg-emerald-50", textClass: "text-emerald-800", borderClass: "border-emerald-200" },
+  { min: 4, max: 4.99, label: "4.0-5.0 Καλή", color: "#22c55e", bgClass: "bg-green-50", textClass: "text-green-800", borderClass: "border-green-200" },
+  { min: 3, max: 3.99, label: "3.0-4.0 Μέτρια", color: "#f59e0b", bgClass: "bg-amber-50", textClass: "text-amber-800", borderClass: "border-amber-200" },
+  { min: 0, max: 2.99, label: "<3.0 Χαμηλή", color: "#ef4444", bgClass: "bg-rose-50", textClass: "text-rose-800", borderClass: "border-rose-200" },
+]
+
+const RECYCLE_EFFICIENCY_BANDS: QualityBand[] = [
+  { min: 75, max: 100, label: ">75% Εξαιρετική", color: "#15803d", bgClass: "bg-emerald-50", textClass: "text-emerald-800", borderClass: "border-emerald-200" },
+  { min: 60, max: 74.99, label: "60-75% Καλή", color: "#22c55e", bgClass: "bg-green-50", textClass: "text-green-800", borderClass: "border-green-200" },
+  { min: 40, max: 59.99, label: "40-60% Μέτρια", color: "#f59e0b", bgClass: "bg-amber-50", textClass: "text-amber-800", borderClass: "border-amber-200" },
+  { min: 0, max: 39.99, label: "<40% Χαμηλή", color: "#ef4444", bgClass: "bg-rose-50", textClass: "text-rose-800", borderClass: "border-rose-200" },
+]
+
 // ── Config ───────────────────────────────────────────────────────────────────
 
 const metricBands: Record<MetricKey, QualityBand[]> = {
   overall: EQI_BANDS,
   air: AQI_BANDS,
   water: WQI_BANDS,
+  recycle: RECYCLE_PER_CAPITA_BANDS,
 }
 
 const metricCode: Record<MetricKey, string> = {
   overall: "EQI",
   air: "AQI",
   water: "WQI",
+  recycle: "kg/κάτ.",
 }
 
 const metricOptions: Array<{
@@ -81,6 +109,7 @@ const metricOptions: Array<{
   { key: "overall", label: "Συνολική Ποιότητα", icon: Medal, color: "text-[#1a535c]" },
   { key: "air", label: "Αέρας", icon: Wind, color: "text-sky-700" },
   { key: "water", label: "Νερό", icon: Droplets, color: "text-cyan-700" },
+  { key: "recycle", label: "Ανακύκλωση", icon: Recycle, color: "text-emerald-700" },
 ]
 
 const metricHeaders: Record<MetricKey, { title: string; subtitle: string }> = {
@@ -96,12 +125,21 @@ const metricHeaders: Record<MetricKey, { title: string; subtitle: string }> = {
     title: "Κατάταξη Ποιότητας Νερού",
     subtitle: "Βάσει WQI — χαμηλότερο WQI = καθαρότερο νερό. Σειρά από τον καλύτερο προς τον χειρότερο.",
   },
+  recycle: {
+    title: "Κατάταξη Ανακύκλωσης",
+    subtitle: "Βάσει μέσου kg/κάτοικο ή efficiency ratio. Υψηλότερο = καλύτερη απόδοση.",
+  },
 }
+
+const recycleSubModeOptions: Array<{ key: RecycleSubMode; label: string }> = [
+  { key: "per_capita", label: "kg/κάτοικο" },
+  { key: "efficiency", label: "Efficiency %" },
+]
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function toMetricKey(value: string | null): MetricKey {
-  if (value === "air" || value === "water" || value === "overall") return value
+  if (value === "air" || value === "water" || value === "overall" || value === "recycle") return value
   return "overall"
 }
 
@@ -135,8 +173,13 @@ export default function LeaderboardPage() {
 
   const [areas, setAreas] = useState<SharedAreaPayload[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [recycleSubMode, setRecycleSubMode] = useState<RecycleSubMode>("per_capita")
+  const [recycleRows, setRecycleRows] = useState<RankedRow[]>([])
+  const [recycleLoading, setRecycleLoading] = useState(false)
 
+  // Fetch shared QI data (for air/water/overall)
   useEffect(() => {
+    if (activeMetric === "recycle") return
     const controller = new AbortController()
     const base = process.env.NEXT_PUBLIC_API_URL?.trim() || "http://127.0.0.1:8000"
     setIsLoading(true)
@@ -159,9 +202,73 @@ export default function LeaderboardPage() {
       })
 
     return () => controller.abort()
-  }, [])
+  }, [activeMetric])
+
+  // Fetch recycling data
+  useEffect(() => {
+    if (activeMetric !== "recycle") return
+    const controller = new AbortController()
+    const base = process.env.NEXT_PUBLIC_API_URL?.trim() || "http://127.0.0.1:8000"
+    setRecycleLoading(true)
+
+    const load = async () => {
+      try {
+        // Get areas first to find latest year
+        const areasRes = await fetch(`${base}/recycling/areas`, { signal: controller.signal })
+        const areasData = (await areasRes.json()) as { areas: string[]; years: number[] }
+        const latestYear = Math.max(...(areasData.years ?? [2024]))
+
+        if (recycleSubMode === "per_capita") {
+          const res = await fetch(`${base}/recycling/compare?year=${latestYear}`, { signal: controller.signal })
+          const data = (await res.json()) as { year: number; comparison: RecycleCompareEntry[] }
+          const rows: RankedRow[] = (data.comparison ?? []).map((entry) => ({
+            area: entry.area,
+            label: AREA_LABELS[entry.area] ?? entry.area,
+            score: entry.avg_kg_per_capita,
+            badgeLabel: null,
+            dominantFactor: null,
+          }))
+          setRecycleRows(rows)
+        } else {
+          // Efficiency mode — compute avg efficiency per area from summary data
+          const summaryRes = await fetch(`${base}/recycling/summary?year=${latestYear}`, { signal: controller.signal })
+          const summaryData = (await summaryRes.json()) as { avg_efficiency: number | null; areas_ranking: RecycleCompareEntry[] }
+
+          // Also get efficiency data for the overall score
+          const effRes = await fetch(`${base}/recycling/efficiency?year=${latestYear}`, { signal: controller.signal })
+          const effData = (await effRes.json()) as RecycleEfficiencyResponse
+
+          // Calculate overall efficiency
+          const avgEff = effData.months.length
+            ? effData.months.reduce((sum, m) => sum + m.efficiency, 0) / effData.months.length
+            : 0
+
+          // For efficiency view, use areas_ranking but replace score with efficiency estimate
+          // Since we only have one global efficiency, show each area's kg/capita ratio as proxy
+          const rows: RankedRow[] = (summaryData.areas_ranking ?? []).map((entry) => ({
+            area: entry.area,
+            label: AREA_LABELS[entry.area] ?? entry.area,
+            score: Math.round(avgEff * 100),
+            badgeLabel: null,
+            dominantFactor: null,
+          }))
+          setRecycleRows(rows)
+        }
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return
+        setRecycleRows([])
+      } finally {
+        if (!controller.signal.aborted) setRecycleLoading(false)
+      }
+    }
+
+    void load()
+    return () => controller.abort()
+  }, [activeMetric, recycleSubMode])
 
   const rankedRows: RankedRow[] = useMemo(() => {
+    if (activeMetric === "recycle") return recycleRows
+
     const rows = areas
       .map((item) => {
         const score = scoreForMetric(item, activeMetric)
@@ -185,14 +292,18 @@ export default function LeaderboardPage() {
     }
 
     return rows
-  }, [areas, activeMetric])
+  }, [areas, activeMetric, recycleRows])
 
+  const loading = activeMetric === "recycle" ? recycleLoading : isLoading
   const header = metricHeaders[activeMetric]
-  const bands = metricBands[activeMetric]
-  const code = metricCode[activeMetric]
+  const activeBands = activeMetric === "recycle"
+    ? (recycleSubMode === "efficiency" ? RECYCLE_EFFICIENCY_BANDS : RECYCLE_PER_CAPITA_BANDS)
+    : metricBands[activeMetric]
+  const code = activeMetric === "recycle"
+    ? (recycleSubMode === "efficiency" ? "Eff%" : "kg/κάτ.")
+    : metricCode[activeMetric]
 
   // Medal colors for top 3
-  const medalColors = ["text-amber-500", "text-zinc-400", "text-amber-700"]
   const medalEmojis = ["🥇", "🥈", "🥉"]
 
   return (
@@ -207,7 +318,7 @@ export default function LeaderboardPage() {
           <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white md:text-5xl">Κατάταξη περιοχών</h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-white/90 md:text-lg">
             Live κατάταξη των {rankedRows.length > 0 ? rankedRows.length : ""} δήμων βάσει πραγματικών δεδομένων ποιότητας
-            αέρα, νερού και του σύνθετου δείκτη EQI.
+            αέρα, νερού, ανακύκλωσης και του σύνθετου δείκτη EQI.
           </p>
         </div>
       </section>
@@ -227,7 +338,7 @@ export default function LeaderboardPage() {
                   key={option.key}
                   href={`/leaderboard?metric=${option.key}`}
                   className={[
-                    "inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors",
+                    "inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors whitespace-nowrap",
                     isActive
                       ? "border-[#1daaad] bg-[#e9fbfb] text-[#1a535c]"
                       : "border-[#d6ecec] bg-white text-[#1a535c]/82 hover:bg-[#f4fbfb]",
@@ -239,6 +350,30 @@ export default function LeaderboardPage() {
               )
             })}
           </div>
+
+          {/* Recycle sub-mode pills */}
+          {activeMetric === "recycle" && (
+            <div className="mt-3 flex gap-2">
+              {recycleSubModeOptions.map((option) => {
+                const isActive = option.key === recycleSubMode
+                return (
+                  <button
+                    key={option.key}
+                    type="button"
+                    onClick={() => setRecycleSubMode(option.key)}
+                    className={[
+                      "inline-flex h-9 cursor-pointer items-center rounded-full border px-4 text-sm font-semibold transition-all",
+                      isActive
+                        ? "border-emerald-300 bg-emerald-50 text-emerald-800 shadow-sm"
+                        : "border-emerald-200 bg-white text-emerald-700/65 hover:bg-emerald-50/50",
+                    ].join(" ")}
+                  >
+                    {option.label}
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.3fr_0.95fr]">
@@ -247,7 +382,7 @@ export default function LeaderboardPage() {
             <h2 className="text-2xl font-semibold text-[#1a535c]">{header.title}</h2>
             <p className="mt-2 text-sm leading-7 text-[#1a535c]/80">{header.subtitle}</p>
 
-            {isLoading ? (
+            {loading ? (
               <div className="mt-5 flex h-48 items-center justify-center rounded-2xl border border-[#d7eff0] bg-[#f7fcfc]">
                 <p className="text-sm font-medium text-[#1a535c]/75">Φόρτωση δεδομένων...</p>
               </div>
@@ -268,7 +403,7 @@ export default function LeaderboardPage() {
                 {/* Rows */}
                 <div className="divide-y divide-[#e6f2f2]">
                   {rankedRows.map((row, index) => {
-                    const band = getBandForScore(row.score, bands)
+                    const band = getBandForScore(row.score, activeBands)
                     const isTop3 = index < 3
 
                     return (
@@ -343,7 +478,7 @@ export default function LeaderboardPage() {
             <div className="rounded-3xl border border-[#d7eff0] bg-white p-5 shadow-sm">
               <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#1daaad]">Υπόμνημα ({code})</p>
               <div className="mt-3 space-y-2">
-                {bands.map((band) => (
+                {activeBands.map((band) => (
                   <div key={band.label} className={`rounded-xl border px-3 py-2 text-sm ${band.bgClass} ${band.textClass} ${band.borderClass}`}>
                     <span className="mr-2 inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: band.color }} />
                     {band.label}
@@ -360,7 +495,7 @@ export default function LeaderboardPage() {
                   href={`/map?metric=${activeMetric}`}
                   className="rounded-xl border border-[#d7eff0] bg-[#f7fcfc] px-3 py-2.5 text-sm font-medium text-[#1a535c] transition hover:bg-[#eef9f9]"
                 >
-                  🗺️ Άνοιγμα χάρτη ({metricCode[activeMetric]})
+                  🗺️ Άνοιγμα χάρτη ({code})
                 </Link>
                 <Link
                   href="/services"

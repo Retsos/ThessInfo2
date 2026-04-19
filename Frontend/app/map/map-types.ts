@@ -10,6 +10,7 @@ export type SharedAreaPayload = {
     air: { aqi_raw: number | null; air_norm: number | null; aqi_label: string | null }
     water: { wqi_raw: number | null; water_norm: number | null; wqi_rating: string | null }
     eqi: { eqi_raw: number | null; eqi_display: number | null; band: string | null }
+    recycle?: { score: number | null }
   }
   dominant_factor: string | null
   sources?: {

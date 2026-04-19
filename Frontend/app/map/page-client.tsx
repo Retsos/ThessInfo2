@@ -11,6 +11,7 @@ import { resolveBand } from "../components/map/compute-score"
 import EqiInfoModal from "./_components/eqi-info-modal"
 import AqiInfoModal from "./_components/aqi-info-modal"
 import WqiInfoModal from "./_components/wqi-info-modal"
+import { InfoModal } from "./_components/info-modal"
 import { MetricSwitcher } from "./_components/metric-switcher"
 import { MapSidebar } from "./_components/map-sidebar"
 import { metricConfigs, metricModalContent } from "./map-metrics"
@@ -37,6 +38,7 @@ function scoreByMetric(item: SharedAreaPayload, metric: MetricKey): number | nul
   if (metric === "overall") return item.metrics.eqi.eqi_display
   if (metric === "air") return item.metrics.air.aqi_raw
   if (metric === "water") return item.metrics.water.wqi_raw
+  if (metric === "recycle") return item.metrics.recycle?.score ?? null
   return null
 }
 
@@ -209,6 +211,35 @@ export default function MapPageClient() {
             sample: mapped[0] ?? null,
           })
           setAreas(mapped)
+        } else if (activeMetric === "recycle") {
+          const areasRes = await fetch(`${base}/recycling/areas`, { signal: controller.signal })
+          const areasData = await areasRes.json()
+          const latestYear = Math.max(...(areasData.years ?? [2024]))
+
+          const compareRes = await fetch(`${base}/recycling/compare?year=${latestYear}`, { signal: controller.signal })
+          const compareData = await compareRes.json()
+          
+          const RECYCLE_TO_MAP_ALIASES: Record<string, string[]> = {
+            "ΘΕΡΜΗ": ["Thermi Municipality", "Δήμος Θέρμης", "Thermi"],
+            "ΚΑΛΑΜΑΡΙΑ": ["Kalamaria Municipality", "Δήμος Καλαμαριάς", "Kalamaria"],
+            "ΠΥΛΑΙΑ-ΧΟΡΤΙΑΤΗΣ": ["Pylaia Municipality", "Pylaia - Chortiatis", "Municipality of Pylaia - Chortiatis", "Δήμος Πυλαίας - Χορτιάτη", "Pulaia"],
+            "ΘΕΡΜΑΪΚΟΣ": ["Thermaikos Municipality", "Δήμος Θερμαϊκού", "Thermaikos"],
+          }
+
+          const mapped: SharedAreaPayload[] = (compareData.comparison ?? []).map((entry: any) => ({
+            area: entry.area,
+            aliases: RECYCLE_TO_MAP_ALIASES[entry.area] ?? [entry.area],
+            metrics: {
+              air: { aqi_raw: null, air_norm: null, aqi_label: null },
+              water: { wqi_raw: null, water_norm: null, wqi_rating: null },
+              eqi: { eqi_raw: null, eqi_display: null, band: null },
+              recycle: { score: entry.avg_kg_per_capita }
+            },
+            dominant_factor: null
+          }))
+
+          console.log("[Map][recycle] loaded", { totalAreas: mapped.length })
+          setAreas(mapped)
         } else {
           const res = await fetch(`${base}/sharedqi/areas?metric=${activeMetric}&_ts=${Date.now()}`, {
             signal: controller.signal,
@@ -333,6 +364,15 @@ export default function MapPageClient() {
       <EqiInfoModal open={isInfoModalOpen && activeMetric === "overall"} onClose={() => setIsInfoModalOpen(false)} />
       <AqiInfoModal open={isInfoModalOpen && activeMetric === "air"} onClose={() => setIsInfoModalOpen(false)} />
       <WqiInfoModal open={isInfoModalOpen && activeMetric === "water"} onClose={() => setIsInfoModalOpen(false)} />
+      
+      {activeMetric === "recycle" && (
+        <InfoModal
+          open={isInfoModalOpen}
+          onClose={() => setIsInfoModalOpen(false)}
+          title={modalContent.title}
+          body={modalContent.placeholder}
+        />
+      )}
     </div>
   )
 }

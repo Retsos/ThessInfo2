@@ -113,9 +113,7 @@ export default function RegionResultsPage({ region }: Props) {
                         {activeTab === "recycle" && (
                             <RecycleTab
                                 regionLabel={region.label}
-                                ota={data.recycle.ota}
-                                perPerson={data.recycle.perPerson}
-                                usableGeneral={data.recycle.usableGeneral}
+                                data={data.recycle}
                             />
                         )}
 
