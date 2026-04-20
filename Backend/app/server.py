@@ -7,20 +7,18 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# 1. Όρισε τις διευθύνσεις που επιτρέπεται να "χτυπάνε" το API σου
 origins = [
-    "http://localhost:3000",      # Το τοπικό σου Next.js/React
-    "http://192.168.2.6:3000",    # Αν μπαίνεις από την IP του δικτύου
-    "https://το-site-sou.vercel.app" # Το domain σου στο Vercel (όταν το κάνεις deploy)
+    "http://localhost:3000",     
+    "http://192.168.2.6:3000",   
+    "https://το-site-sou.vercel.app" 
 ]
 
-# 2. Πρόσθεσε το Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,            # Επιτρέπει τα συγκεκριμένα sites
+    allow_origins=origins,           
     allow_credentials=True,
-    allow_methods=["*"],              # Επιτρέπει όλα τα methods (GET, POST, κλπ)
-    allow_headers=["*"],              # Επιτρέπει όλα τα headers
+    allow_methods=["*"],            
+    allow_headers=["*"],            
 )
 
 app.include_router(water_router)
