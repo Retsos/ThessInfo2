@@ -1,10 +1,8 @@
 import axios from "axios"
-
-const API_BASE_URL2 =
-  process.env.NEXT_PUBLIC_API_URL?.trim() || "http://127.0.0.1:8010"
+import { getApiBaseUrl } from "@/lib/api-base"
 
 export const api = axios.create({
-  baseURL: API_BASE_URL2,
+  baseURL: getApiBaseUrl(),
   headers: {
     "Content-Type": "application/json",
   },

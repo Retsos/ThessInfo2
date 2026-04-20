@@ -1,6 +1,7 @@
 import { create } from "zustand"
 import type { RegionCatalogItem } from "@/app/data/region-catalog"
 import { fetchRegionResults, type RegionResultsData } from "@/lib/services/fetch-region-results"
+import { getApiBaseUrl } from "@/lib/api-base"
 import airApi from "@/lib/api2"
 
 // --- Types ---
@@ -80,8 +81,6 @@ const RECYCLE_TO_MAP_ALIASES: Record<string, string[]> = {
   "ΘΕΡΜΑΪΚΟΣ": ["Thermaikos Municipality", "Δήμος Θερμαϊκού", "Thermaikos"],
 }
 
-const getApiBase = () => process.env.NEXT_PUBLIC_API_URL?.trim() || "http://127.0.0.1:8000"
-
 const regionPromises: Record<string, Promise<RegionResultsData | null> | undefined> = {}
 
 export const useDataStore = create<DataState>((set, get) => ({
@@ -104,7 +103,7 @@ export const useDataStore = create<DataState>((set, get) => ({
 
     set({ sharedQiLoading: true })
     try {
-      const res = await fetch(`${getApiBase()}/sharedqi/areas?_ts=${Date.now()}`)
+      const res = await fetch(`${getApiBaseUrl()}/sharedqi/areas?_ts=${Date.now()}`)
       if (res.ok) {
         const payload = await res.json()
         set({ sharedQiData: payload.areas ?? [] })
@@ -166,7 +165,7 @@ export const useDataStore = create<DataState>((set, get) => ({
 
     set({ recycleLoading: true })
     try {
-      const base = getApiBase()
+      const base = getApiBaseUrl()
       const areasRes = await fetch(`${base}/recycling/areas`)
       const areasData = await areasRes.json()
       const latestYear = Math.max(...(areasData.years ?? [2024]))
