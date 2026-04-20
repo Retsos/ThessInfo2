@@ -10,7 +10,7 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",     
     "http://192.168.2.6:3000",   
-    "https://το-site-sou.vercel.app" 
+    "thessinfo.vercel.app" 
 ]
 
 app.add_middleware(
