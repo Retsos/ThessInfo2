@@ -11,33 +11,12 @@ import {
   getBandForScore,
   type QualityBand,
 } from "@/lib/quality-indexes"
-import type {
-  RecycleCompareEntry,
-  RecycleEfficiencyResponse,
-} from "@/app/components/results/recycle/recycle-types"
+import { useDataStore, type SharedAreaPayload, type RankedRow } from "@/lib/store/useDataStore"
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
 type MetricKey = "overall" | "air" | "water" | "recycle"
 type RecycleSubMode = "per_capita" | "efficiency"
-
-type SharedAreaPayload = {
-  area: string
-  aliases: string[]
-  metrics: {
-    air: { aqi_raw: number | null; air_norm: number | null; aqi_label: string | null }
-    water: { wqi_raw: number | null; water_norm: number | null; wqi_rating: string | null }
-    eqi: { eqi_raw: number | null; eqi_display: number | null; band: string | null }
-  }
-  dominant_factor: string | null
-  sources?: {
-    air_area: string | null
-    water_area: string | null
-    air_month: string | null
-    water_month: string | null
-    common_month: string | null
-  }
-}
 
 // ── Labels ───────────────────────────────────────────────────────────────────
 
@@ -157,114 +136,47 @@ function badgeLabelForMetric(item: SharedAreaPayload, metric: MetricKey): string
   return null
 }
 
-type RankedRow = {
-  area: string
-  label: string
-  score: number
-  badgeLabel: string | null
-  dominantFactor: string | null
-}
-
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function LeaderboardPage() {
   const searchParams = useSearchParams()
   const activeMetric = toMetricKey(searchParams.get("metric"))
 
-  const [areas, setAreas] = useState<SharedAreaPayload[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const {
+    sharedQiData,
+    sharedQiLoading,
+    recycleCompareData,
+    recycleEfficiencyData,
+    recycleLoading,
+    fetchSharedQi,
+    fetchRecycleData,
+  } = useDataStore()
+
   const [recycleSubMode, setRecycleSubMode] = useState<RecycleSubMode>("per_capita")
-  const [recycleRows, setRecycleRows] = useState<RankedRow[]>([])
-  const [recycleLoading, setRecycleLoading] = useState(false)
 
-  // Fetch shared QI data (for air/water/overall)
+  // Fetch data
   useEffect(() => {
-    if (activeMetric === "recycle") return
-    const controller = new AbortController()
-    const base = process.env.NEXT_PUBLIC_API_URL?.trim() || "http://127.0.0.1:8000"
-    setIsLoading(true)
-
-    fetch(`${base}/sharedqi/areas?_ts=${Date.now()}`, {
-      signal: controller.signal,
-      cache: "no-store",
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error("fetch failed")
-        const payload = (await res.json()) as { areas?: SharedAreaPayload[] }
-        setAreas(payload.areas ?? [])
-      })
-      .catch((err) => {
-        if (err instanceof DOMException && err.name === "AbortError") return
-        setAreas([])
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setIsLoading(false)
-      })
-
-    return () => controller.abort()
-  }, [activeMetric])
-
-  // Fetch recycling data
-  useEffect(() => {
-    if (activeMetric !== "recycle") return
-    const controller = new AbortController()
-    const base = process.env.NEXT_PUBLIC_API_URL?.trim() || "http://127.0.0.1:8000"
-    setRecycleLoading(true)
-
-    const load = async () => {
-      try {
-        // Get areas first to find latest year
-        const areasRes = await fetch(`${base}/recycling/areas`, { signal: controller.signal })
-        const areasData = (await areasRes.json()) as { areas: string[]; years: number[] }
-        const latestYear = Math.max(...(areasData.years ?? [2024]))
-
-        if (recycleSubMode === "per_capita") {
-          const res = await fetch(`${base}/recycling/compare?year=${latestYear}`, { signal: controller.signal })
-          const data = (await res.json()) as { year: number; comparison: RecycleCompareEntry[] }
-          const rows: RankedRow[] = (data.comparison ?? []).map((entry) => ({
-            area: entry.area,
-            label: AREA_LABELS[entry.area] ?? entry.area,
-            score: entry.avg_kg_per_capita,
-            badgeLabel: null,
-            dominantFactor: null,
-          }))
-          setRecycleRows(rows)
-        } else {
-          // Efficiency mode — compute avg efficiency per area from summary data
-          const summaryRes = await fetch(`${base}/recycling/summary?year=${latestYear}`, { signal: controller.signal })
-          const summaryData = (await summaryRes.json()) as { avg_efficiency: number | null; areas_ranking: RecycleCompareEntry[] }
-
-          // Also get efficiency data for the overall score
-          const effRes = await fetch(`${base}/recycling/efficiency?year=${latestYear}`, { signal: controller.signal })
-          const effData = (await effRes.json()) as RecycleEfficiencyResponse
-
-          // Calculate overall efficiency
-          const avgEff = effData.months.length
-            ? effData.months.reduce((sum, m) => sum + m.efficiency, 0) / effData.months.length
-            : 0
-
-          // For efficiency view, use areas_ranking but replace score with efficiency estimate
-          // Since we only have one global efficiency, show each area's kg/capita ratio as proxy
-          const rows: RankedRow[] = (summaryData.areas_ranking ?? []).map((entry) => ({
-            area: entry.area,
-            label: AREA_LABELS[entry.area] ?? entry.area,
-            score: Math.round(avgEff * 100),
-            badgeLabel: null,
-            dominantFactor: null,
-          }))
-          setRecycleRows(rows)
-        }
-      } catch (err) {
-        if (err instanceof DOMException && err.name === "AbortError") return
-        setRecycleRows([])
-      } finally {
-        if (!controller.signal.aborted) setRecycleLoading(false)
-      }
+    if (activeMetric === "recycle") {
+      fetchRecycleData()
+    } else {
+      fetchSharedQi()
     }
+  }, [activeMetric, fetchSharedQi, fetchRecycleData])
 
-    void load()
-    return () => controller.abort()
-  }, [activeMetric, recycleSubMode])
+  const isLoading = activeMetric === "recycle" ? recycleLoading : sharedQiLoading
+  const areas = sharedQiData ?? []
+
+  const recycleRows: RankedRow[] = useMemo(() => {
+    const data = recycleSubMode === "efficiency" ? recycleEfficiencyData : recycleCompareData
+    if (!data) return []
+    return data.map(item => ({
+      area: item.area,
+      label: AREA_LABELS[item.area] ?? item.area,
+      score: item.metrics.recycle?.score ?? 0,
+      badgeLabel: null,
+      dominantFactor: null,
+    }))
+  }, [recycleCompareData, recycleEfficiencyData, recycleSubMode])
 
   const rankedRows: RankedRow[] = useMemo(() => {
     if (activeMetric === "recycle") return recycleRows

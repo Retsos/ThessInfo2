@@ -34,4 +34,3 @@ def read_root():
 
 
 #uvicorn app.server:app --reload --host
-#uvicorn app.server:app --reload --host

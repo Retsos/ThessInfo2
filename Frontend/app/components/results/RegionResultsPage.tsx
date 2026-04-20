@@ -2,10 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react"
 import type { RegionCatalogItem } from "../../data/region-catalog"
-import {
-    fetchRegionResults,
-    type RegionResultsData,
-} from "@/lib/services/fetch-region-results"
+import { type RegionResultsData } from "@/lib/services/fetch-region-results"
+import { useDataStore } from "@/lib/store/useDataStore"
 import ResultsHeader from "./header"
 import ResultsTabs, { type ResultsTabId } from "./tabs"
 import ResultsLoading from "./loading"
@@ -19,6 +17,7 @@ type Props = {
 }
 
 export default function RegionResultsPage({ region }: Props) {
+    const { getRegionResults } = useDataStore()
     const availableTabs = useMemo<ResultsTabId[]>(() => {
         const tabs: ResultsTabId[] = []
 
@@ -50,10 +49,15 @@ export default function RegionResultsPage({ region }: Props) {
                 setLoading(true)
                 setError(null)
 
-                const result = await fetchRegionResults(region)
+                const result = await getRegionResults(region)
 
                 if (!cancelled) {
-                    setData(result)
+                    if (result) {
+                        setData(result)
+                    } else {
+                        setError("Αποτυχία φόρτωσης δεδομένων για την περιοχή.")
+                        setData(null)
+                    }
                 }
             } catch {
                 if (!cancelled) {

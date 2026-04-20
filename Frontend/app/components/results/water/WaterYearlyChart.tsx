@@ -67,7 +67,7 @@ export default function WaterYearlyChart({ overallByYear }: Props) {
             </h4>
 
             <div className="mt-4 h-[280px] md:h-[360px]">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                     <LineChart data={chartData} margin={{ top: 10, right: 12, bottom: 10, left: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#dbeff0" />
                         <XAxis dataKey="year" tick={{ fill: "#1a535c", fontSize: 11 }} />

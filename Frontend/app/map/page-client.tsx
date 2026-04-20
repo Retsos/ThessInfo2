@@ -5,7 +5,6 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import type { QualityBand } from "@/lib/quality-indexes"
-import airApi from "@/lib/api2"
 import type { MapAreaRow } from "../components/map/environment-map"
 import { resolveBand } from "../components/map/compute-score"
 import EqiInfoModal from "./_components/eqi-info-modal"
@@ -49,90 +48,7 @@ function driverByMetric(item: SharedAreaPayload, metric: MetricKey): string | nu
   return null
 }
 
-const AIR_AREA_ALIASES: Record<string, string[]> = {
-  Ampelokipoi: [
-    "Ampelokipoi Municipality",
-    "Ampelokipi - Menemeni Municipality",
-    "Δήμος Αμπελοκήπων - Μενεμένης",
-  ],
-  Chalkidonos: [
-    "Chalkidona Municipality",
-    "Δήμος Χαλκηδόνας",
-  ],
-  Delta: [
-    "Delta Municipality",
-    "Δήμος Δέλτα",
-  ],
-  Kalamaria: [
-    "Kalamaria Municipality",
-    "Δήμος Καλαμαριάς",
-  ],
-  Kordelio: [
-    "Kordelio Municipality",
-    "Evosmos Municipality",
-    "Kordelio-Evosmos Municipality",
-    "Kordelio - Evosmos Municipality",
-    "Δήμος Κορδελιού - Ευόσμου",
-  ],
-  Lagkadas: [
-    "Lagkadas Municipality",
-    "Municipality of Lagadas",
-    "Lagadas",
-    "Δήμος Λαγκαδά",
-  ],
-  Neapoli: [
-    "Neapoli Municipality",
-    "Neapolis-Sykeon Municipality",
-    "Municipality of Neapoli-Sykies",
-    "Δήμος Νεάπολης - Συκεών",
-  ],
-  Oraiokastro: [
-    "Oreokastro Municipality",
-    "Oraiokastro Municipality",
-    "Δήμος Ωραιοκάστρου",
-  ],
-  Pavlou_Mela: [
-    "Pavlou Mela Municipality",
-    "Pavlos Melas Municipality",
-    "Δήμος Παύλου Μελά",
-  ],
-  Pulaia: [
-    "Pylaia Municipality",
-    "Pulaia Municipality",
-    "Municipality of Pylaia - Chortiatis",
-    "Pylaia - Chortiatis",
-    "Δήμος Πυλαίας - Χορτιάτη",
-  ],
-  Thermaikos: [
-    "Thermaikos Municipality",
-    "Δήμος Θερμαϊκού",
-  ],
-  Thermi: [
-    "Thermi Municipality",
-    "Δήμος Θέρμης",
-  ],
-  Thessaloniki: [
-    "Thessaloniki Municipality",
-    "Municipality of Thessaloniki",
-    "Δήμος Θεσσαλονίκης",
-  ],
-  Volvi: [
-    "Volvi Municipality",
-    "Δήμος Βόλβης",
-  ],
-}
-
-type AirAreasResponse = { areas?: string[] }
-type AirLatestMonthResponse = {
-  aqi_score?: number | null
-  aqi_label?: string | null
-}
-type AirMapRow = {
-  area: string
-  aliases: string[]
-  score: number | null
-  label: string | null
-}
+import { useDataStore } from "@/lib/store/useDataStore"
 
 export default function MapPageClient() {
   const searchParams = useSearchParams()
@@ -140,11 +56,20 @@ export default function MapPageClient() {
   const config = metricConfigs[activeMetric]
   const modalContent = metricModalContent[activeMetric]
 
-  const [areas, setAreas] = useState<SharedAreaPayload[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const {
+    sharedQiData,
+    sharedQiLoading,
+    airMapData,
+    airMapLoading,
+    recycleCompareData,
+    recycleLoading,
+    fetchSharedQi,
+    fetchAirMap,
+    fetchRecycleData,
+  } = useDataStore()
+
   const [selected, setSelected] = useState<AreaSelection | null>(null)
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false)
-  const [dataVersion, setDataVersion] = useState(0)
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -153,123 +78,26 @@ export default function MapPageClient() {
   }, [isInfoModalOpen])
 
   useEffect(() => {
-    const controller = new AbortController()
-    const base = process.env.NEXT_PUBLIC_API_URL?.trim() || "http://127.0.0.1:8000"
-    setIsLoading(true)
     setSelected(null)
-
-    const load = async () => {
-      try {
-        if (activeMetric === "air") {
-          const areasRes = await airApi.get<AirAreasResponse>("/air/areas", { signal: controller.signal })
-          const areaNames = areasRes.data.areas ?? []
-
-          const settled = await Promise.allSettled(
-            areaNames.map(async (area) => {
-              const encoded = encodeURIComponent(area)
-              const latest = await airApi.get<AirLatestMonthResponse>(`/air/area/${encoded}/latest-month`, {
-                signal: controller.signal,
-              })
-              return {
-                area,
-                aliases: AIR_AREA_ALIASES[area] ?? [],
-                score: typeof latest.data?.aqi_score === "number" ? latest.data.aqi_score : null,
-                label: typeof latest.data?.aqi_label === "string" ? latest.data.aqi_label : null,
-              }
-            })
-          )
-
-          const mapped: SharedAreaPayload[] = settled
-            .map((result) => (result.status === "fulfilled" ? result.value : null))
-            .filter((row): row is AirMapRow => row !== null)
-            .map((row) => ({
-              area: row.area,
-              aliases: row.aliases,
-              metrics: {
-                air: {
-                  aqi_raw: row.score,
-                  air_norm: null,
-                  aqi_label: row.label,
-                },
-                water: {
-                  wqi_raw: null,
-                  water_norm: null,
-                  wqi_rating: null,
-                },
-                eqi: {
-                  eqi_raw: null,
-                  eqi_display: null,
-                  band: null,
-                },
-              },
-              dominant_factor: row.score == null ? null : "air",
-            }))
-
-          console.log("[Map][air] loaded from results source", {
-            metric: activeMetric,
-            totalAreas: mapped.length,
-            sample: mapped[0] ?? null,
-          })
-          setAreas(mapped)
-        } else if (activeMetric === "recycle") {
-          const areasRes = await fetch(`${base}/recycling/areas`, { signal: controller.signal })
-          const areasData = await areasRes.json()
-          const latestYear = Math.max(...(areasData.years ?? [2024]))
-
-          const compareRes = await fetch(`${base}/recycling/compare?year=${latestYear}`, { signal: controller.signal })
-          const compareData = await compareRes.json()
-          
-          const RECYCLE_TO_MAP_ALIASES: Record<string, string[]> = {
-            "ΘΕΡΜΗ": ["Thermi Municipality", "Δήμος Θέρμης", "Thermi"],
-            "ΚΑΛΑΜΑΡΙΑ": ["Kalamaria Municipality", "Δήμος Καλαμαριάς", "Kalamaria"],
-            "ΠΥΛΑΙΑ-ΧΟΡΤΙΑΤΗΣ": ["Pylaia Municipality", "Pylaia - Chortiatis", "Municipality of Pylaia - Chortiatis", "Δήμος Πυλαίας - Χορτιάτη", "Pulaia"],
-            "ΘΕΡΜΑΪΚΟΣ": ["Thermaikos Municipality", "Δήμος Θερμαϊκού", "Thermaikos"],
-          }
-
-          const mapped: SharedAreaPayload[] = (compareData.comparison ?? []).map((entry: any) => ({
-            area: entry.area,
-            aliases: RECYCLE_TO_MAP_ALIASES[entry.area] ?? [entry.area],
-            metrics: {
-              air: { aqi_raw: null, air_norm: null, aqi_label: null },
-              water: { wqi_raw: null, water_norm: null, wqi_rating: null },
-              eqi: { eqi_raw: null, eqi_display: null, band: null },
-              recycle: { score: entry.avg_kg_per_capita }
-            },
-            dominant_factor: null
-          }))
-
-          console.log("[Map][recycle] loaded", { totalAreas: mapped.length })
-          setAreas(mapped)
-        } else {
-          const res = await fetch(`${base}/sharedqi/areas?metric=${activeMetric}&_ts=${Date.now()}`, {
-            signal: controller.signal,
-            cache: "no-store",
-          })
-          if (!res.ok) throw new Error("sharedqi fetch failed")
-          const payload = (await res.json()) as { areas?: SharedAreaPayload[] }
-          const mapped = payload.areas ?? []
-          console.log("[Map][sharedqi] loaded", {
-            metric: activeMetric,
-            totalAreas: mapped.length,
-            sample: mapped[0] ?? null,
-          })
-          setAreas(mapped)
-        }
-        setDataVersion((value) => value + 1)
-      } catch (error: unknown) {
-        if (error instanceof DOMException && error.name === "AbortError") return
-        setAreas([])
-        setDataVersion((value) => value + 1)
-        console.log("[Map] load error", { metric: activeMetric, error })
-      } finally {
-        if (!controller.signal.aborted) setIsLoading(false)
-      }
+    if (activeMetric === "air") {
+      fetchAirMap()
+    } else if (activeMetric === "recycle") {
+      fetchRecycleData()
+    } else {
+      fetchSharedQi()
     }
+  }, [activeMetric, fetchAirMap, fetchRecycleData, fetchSharedQi])
 
-    void load()
+  const isLoading = 
+    (activeMetric === "air" && airMapLoading) ||
+    (activeMetric === "recycle" && recycleLoading) ||
+    ((activeMetric === "overall" || activeMetric === "water") && sharedQiLoading)
 
-    return () => controller.abort()
-  }, [activeMetric])
+  const areas = useMemo(() => {
+    if (activeMetric === "air") return airMapData ?? []
+    if (activeMetric === "recycle") return recycleCompareData ?? []
+    return sharedQiData ?? []
+  }, [activeMetric, airMapData, recycleCompareData, sharedQiData])
 
   const rows: Array<MapAreaRow & { source?: SharedAreaPayload }> = useMemo(
     () =>
@@ -324,7 +152,7 @@ export default function MapPageClient() {
                 </div>
               ) : (
                 <EnvironmentMap
-                  key={`environment-map-${activeMetric}-${dataVersion}`}
+                  key={`environment-map-${activeMetric}`}
                   metric={activeMetric}
                   indexCode={config.indexCode}
                   rows={rows}
