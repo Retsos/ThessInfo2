@@ -11,7 +11,7 @@ import { resolveBand } from "../components/map/compute-score"
 import EqiInfoModal from "./_components/eqi-info-modal"
 import AqiInfoModal from "./_components/aqi-info-modal"
 import WqiInfoModal from "./_components/wqi-info-modal"
-import { InfoModal } from "./_components/info-modal"
+import RecycleInfoModal from "./_components/recycle-info-modal"
 import { MetricSwitcher } from "./_components/metric-switcher"
 import { MapSidebar } from "./_components/map-sidebar"
 import { metricConfigs, metricModalContent } from "./map-metrics"
@@ -364,15 +364,7 @@ export default function MapPageClient() {
       <EqiInfoModal open={isInfoModalOpen && activeMetric === "overall"} onClose={() => setIsInfoModalOpen(false)} />
       <AqiInfoModal open={isInfoModalOpen && activeMetric === "air"} onClose={() => setIsInfoModalOpen(false)} />
       <WqiInfoModal open={isInfoModalOpen && activeMetric === "water"} onClose={() => setIsInfoModalOpen(false)} />
-      
-      {activeMetric === "recycle" && (
-        <InfoModal
-          open={isInfoModalOpen}
-          onClose={() => setIsInfoModalOpen(false)}
-          title={modalContent.title}
-          body={modalContent.placeholder}
-        />
-      )}
+      <RecycleInfoModal open={isInfoModalOpen && activeMetric === "recycle"} onClose={() => setIsInfoModalOpen(false)} />
     </div>
   )
 }
