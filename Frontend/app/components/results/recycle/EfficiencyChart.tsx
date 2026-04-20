@@ -112,7 +112,10 @@ export default function EfficiencyChart({ efficiency, year, regionLabel }: Props
                                 boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                                 padding: "8px 12px"
                             }}
-                            formatter={(value: number) => [`${value}%`, "Efficiency"]}
+                            formatter={(value) => [
+                                `${typeof value === "number" ? value : 0}%`,
+                                "Efficiency",
+                            ]}
                         />
                         <ReferenceLine
                             y={70}

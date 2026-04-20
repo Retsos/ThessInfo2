@@ -88,8 +88,8 @@ export default function WasteStackedChart({ efficiency, year, regionLabel }: Pro
                                 boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                                 padding: "8px 12px"
                             }}
-                            formatter={(value: number) => [
-                                `${value.toLocaleString("el-GR")} kg`,
+                            formatter={(value) => [
+                                `${typeof value === "number" ? value.toLocaleString("el-GR") : 0} kg`,
                                 "",
                             ]}
                         />

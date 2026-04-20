@@ -80,8 +80,8 @@ export default function ComparisonBarChart({ comparison, year }: Props) {
                                 border: "1px solid #d7eff0",
                                 fontSize: 13,
                             }}
-                            formatter={(value: number) => [
-                                `${value} kg/κάτοικο`,
+                            formatter={(value) => [
+                                `${typeof value === "number" ? value : 0} kg/κάτοικο`,
                                 "Μ.Ο.",
                             ]}
                         />

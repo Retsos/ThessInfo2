@@ -221,15 +221,19 @@ export const useDataStore = create<DataState>((set, get) => ({
     }
   },
 
-  getRegionResults: async (region: RegionCatalogItem) => {
+  getRegionResults: async (
+    region: RegionCatalogItem
+  ): Promise<RegionResultsData | null> => {
     const { regionResultsCache } = get()
+    const cachedResults = regionResultsCache[region.slug] ?? null
+    const pendingResults = regionPromises[region.slug]
     
-    if (regionResultsCache[region.slug]) {
-      return regionResultsCache[region.slug]
+    if (cachedResults) {
+      return cachedResults
     }
 
-    if (regionPromises[region.slug]) {
-      return regionPromises[region.slug]
+    if (pendingResults) {
+      return pendingResults
     }
 
     const promise = (async () => {
