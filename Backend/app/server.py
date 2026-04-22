@@ -11,6 +11,7 @@ origins = [
     "http://localhost:3000",     
     "http://192.168.2.6:3000",   
     "https://thessinfo.vercel.app" 
+    "https://thessinfo.devalis.gr" 
 ]
 
 app.add_middleware(
