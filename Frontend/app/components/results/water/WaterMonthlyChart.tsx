@@ -72,7 +72,7 @@ export default function WaterMonthlyChart({ year, entries }: Props) {
                 </div>
             </div>
 
-            <div className="mt-5 h-[320px] md:h-[360px]">
+            <div className="mt-5 h-[380px] md:h-[440px]">
                 <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                     <LineChart data={chartData} margin={{ top: 10, right: 12, bottom: 10, left: 0 }}>
                         <CartesianGrid stroke="#dbeff0" strokeDasharray="3 3" />
