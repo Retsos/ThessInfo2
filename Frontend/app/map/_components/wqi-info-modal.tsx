@@ -84,37 +84,37 @@ export default function WqiInfoModal({ open, onClose }: Props) {
                   <td className="px-4 py-2 font-medium">pH</td>
                   <td className="px-4 py-2">8.5</td>
                   <td className="px-4 py-2">7.0</td>
-                  <td className="px-4 py-2">0.2149</td>
+                  <td className="px-4 py-2">0.22</td>
+                </tr>
+                <tr className="border-t border-sky-100">
+                  <td className="px-4 py-2 font-medium">Υπολειμματικό χλώριο (mg/L)</td>
+                  <td className="px-4 py-2">0.5</td>
+                  <td className="px-4 py-2">0.0</td>
+                  <td className="px-4 py-2">0.20</td>
                 </tr>
                 <tr className="border-t border-sky-100">
                   <td className="px-4 py-2 font-medium">Θολότητα (NTU)</td>
-                  <td className="px-4 py-2">5.0</td>
+                  <td className="px-4 py-2">1.0</td>
                   <td className="px-4 py-2">0.0</td>
-                  <td className="px-4 py-2">0.1432</td>
+                  <td className="px-4 py-2">0.15</td>
+                </tr>
+                <tr className="border-t border-sky-100">
+                  <td className="px-4 py-2 font-medium">Αργίλιο (μg/L)</td>
+                  <td className="px-4 py-2">200.0</td>
+                  <td className="px-4 py-2">0.0</td>
+                  <td className="px-4 py-2">0.12</td>
                 </tr>
                 <tr className="border-t border-sky-100">
                   <td className="px-4 py-2 font-medium">Χλωριούχα (mg/L)</td>
                   <td className="px-4 py-2">250.0</td>
                   <td className="px-4 py-2">0.0</td>
-                  <td className="px-4 py-2">0.1432</td>
+                  <td className="px-4 py-2">0.10</td>
                 </tr>
                 <tr className="border-t border-sky-100">
                   <td className="px-4 py-2 font-medium">Αγωγιμότητα (μS/cm)</td>
                   <td className="px-4 py-2">2500.0</td>
                   <td className="px-4 py-2">0.0</td>
-                  <td className="px-4 py-2">0.1432</td>
-                </tr>
-                <tr className="border-t border-sky-100">
-                  <td className="px-4 py-2 font-medium">Νιτρικά (mg/L)</td>
-                  <td className="px-4 py-2">50.0</td>
-                  <td className="px-4 py-2">0.0</td>
-                  <td className="px-4 py-2">0.1432</td>
-                </tr>
-                <tr className="border-t border-sky-100">
-                  <td className="px-4 py-2 font-medium">Νιτρώδη (mg/L)</td>
-                  <td className="px-4 py-2">0.50</td>
-                  <td className="px-4 py-2">0.0</td>
-                  <td className="px-4 py-2">0.2124</td>
+                  <td className="px-4 py-2">0.08</td>
                 </tr>
               </tbody>
             </table>
@@ -122,7 +122,8 @@ export default function WqiInfoModal({ open, onClose }: Props) {
 
           <p className="mt-3 text-sm leading-6 text-[#1a535c]/82">
             Σε περιπτώσεις όπου δεν υπάρχουν διαθέσιμες μετρήσεις για κάποια παράμετρο,
-            αυτή δεν συμμετέχει στον υπολογισμό.
+            αυτή δεν συμμετέχει στον υπολογισμό — τόσο ο αριθμητής όσο και ο
+            παρονομαστής στον σταθμισμένο μέσο όρο προσαρμόζονται ανάλογα.
           </p>
 
           {/* Classification */}

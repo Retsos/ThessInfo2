@@ -112,10 +112,16 @@ export default function EqiInfoModal({ open, onClose }: Props) {
                   <td className="px-4 py-2 font-medium text-orange-700">Κακή</td>
                 </tr>
                 <tr className="border-t border-teal-100">
-                  <td className="px-4 py-2">201–500</td>
-                  <td className="px-4 py-2">&gt;100</td>
-                  <td className="px-4 py-2">80–100</td>
-                  <td className="px-4 py-2 font-medium text-rose-700">Επικίνδυνη</td>
+                  <td className="px-4 py-2">201–300</td>
+                  <td className="px-4 py-2">101–200</td>
+                  <td className="px-4 py-2">80–90</td>
+                  <td className="px-4 py-2 font-medium text-rose-700">Πολύ Ανθυγιεινή</td>
+                </tr>
+                <tr className="border-t border-teal-100">
+                  <td className="px-4 py-2">301–500</td>
+                  <td className="px-4 py-2">&gt;200</td>
+                  <td className="px-4 py-2">90–100</td>
+                  <td className="px-4 py-2 font-medium text-rose-800">Επικίνδυνη</td>
                 </tr>
               </tbody>
             </table>

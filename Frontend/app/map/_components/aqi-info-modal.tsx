@@ -64,8 +64,8 @@ export default function AqiInfoModal({ open, onClose }: Props) {
               Αν ένας μόνο ρύπος είναι πολύ πάνω από το όριο, αυτός καθορίζει το AQI.
             </li>
             <li>
-              Στο <span className="font-medium">CO</span> γίνεται μετατροπή σε{" "}
-              <code>mg/m³</code> πριν από τη σύγκριση, ώστε να ταιριάζει με το όριο.
+              Στο <span className="font-medium">CO</span> γίνεται μετατροπή από{" "}
+              <code>μg/m³</code> σε <code>mg/m³</code> πριν από τη σύγκριση, ώστε να ταιριάζει με το όριο.
             </li>
             <li>
               Έτσι ο δείκτης δείχνει άμεσα ποιος ρύπος είναι ο πιο επιβαρυντικός.
@@ -79,38 +79,43 @@ export default function AqiInfoModal({ open, onClose }: Props) {
                 <tr>
                   <th className="px-4 py-2">Ρύπος</th>
                   <th className="px-4 py-2">Μονάδα</th>
-                  <th className="px-4 py-2">Ωριαίο όριο</th>
+                  <th className="px-4 py-2">Όριο αναφοράς</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-t border-cyan-100">
                   <td className="px-4 py-2 font-medium">NO₂</td>
                   <td className="px-4 py-2">μg/m³</td>
-                  <td className="px-4 py-2">200</td>
+                  <td className="px-4 py-2">9.5</td>
                 </tr>
                 <tr className="border-t border-cyan-100">
                   <td className="px-4 py-2 font-medium">SO₂</td>
                   <td className="px-4 py-2">μg/m³</td>
-                  <td className="px-4 py-2">350</td>
+                  <td className="px-4 py-2">10.0</td>
                 </tr>
                 <tr className="border-t border-cyan-100">
                   <td className="px-4 py-2 font-medium">O₃</td>
                   <td className="px-4 py-2">μg/m³</td>
-                  <td className="px-4 py-2">180</td>
+                  <td className="px-4 py-2">50.0</td>
                 </tr>
                 <tr className="border-t border-cyan-100">
                   <td className="px-4 py-2 font-medium">CO</td>
                   <td className="px-4 py-2">mg/m³</td>
-                  <td className="px-4 py-2">10</td>
+                  <td className="px-4 py-2">4.0</td>
                 </tr>
                 <tr className="border-t border-cyan-100">
                   <td className="px-4 py-2 font-medium">NO</td>
                   <td className="px-4 py-2">μg/m³</td>
-                  <td className="px-4 py-2">400</td>
+                  <td className="px-4 py-2">1.5</td>
                 </tr>
               </tbody>
             </table>
           </div>
+          <p className="mt-2 text-xs leading-5 text-[#1a535c]/65">
+            Τα όρια ακολουθούν τις <span className="font-medium">ετήσιες κατευθυντήριες
+            οδηγίες του Παγκόσμιου Οργανισμού Υγείας (WHO)</span>, που είναι αυστηρότερες
+            από τα ωριαία EU limits και δείχνουν τη συνεχή έκθεση σε ρύπο.
+          </p>
 
           {/* Classification */}
           <h5 className="mt-5 text-base font-semibold text-[#1a535c]">
