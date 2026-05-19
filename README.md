@@ -270,6 +270,10 @@ npm start
 
 ## 📊 API Endpoints
 
+> 💡 **Interactive API docs:** Once the backend is running, the full auto-generated
+> Swagger UI is available at **[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)**
+> — useful for exploring endpoints, testing requests live, and viewing response schemas.
+
 ### Air Quality (`/air`)
 | Endpoint | Purpose |
 |---|---|
@@ -334,6 +338,24 @@ ThessInfo/
 
 ---
 
+## 🛣️ Roadmap
+
+The architecture is designed for extensibility — turning ThessInfo from a static
+information tool into a complete *Environmental Observatory*. Planned extensions:
+
+- 📡 **Real-time IoT data** — Integration with city sensor networks via WebSockets / MQTT
+  for live AQI updates per minute, instead of historical aggregation.
+- 🤖 **Predictive analytics** — Time-series regression on historical data to forecast
+  air & water quality for the next 48 hours, factoring in weather and traffic patterns.
+- 🌐 **New environmental metrics** — Extend the EQI framework with noise pollution,
+  EMF radiation, and traffic load — moving toward a holistic *Smart City Dashboard*.
+- 📱 **Mobile PWA + push notifications** — Native-grade experience with alerts when
+  pollutants in a geofenced area exceed WHO safety thresholds.
+- 🇬🇷 **Multi-tenancy** — Parameterize the platform to support multiple Greek cities
+  (Athens, Larissa, …) for cross-municipality benchmarking at national scale.
+
+---
+
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -370,8 +392,10 @@ The methodological foundations of the indices used in this platform:
 3. **Council Directive 98/83/EC** — On the quality of water intended for human consumption.
    Source of the regulatory parametric values (`Sᵢ`) used in the WQI configuration.
 
-4. **HRADF / National recycling reports** — Source data structure for the recycling
-   efficiency framework (Recyclables vs. KDAU Residual at sorting facilities).
+4. **Open Data Marketplace — Δήμος Θεσσαλονίκης**
+   ([opendata.thessaloniki.gr](https://opendata.thessaloniki.gr/))
+   Primary source of the raw datasets used in this platform — environmental measurements,
+   recycling tonnage per municipality, and KDAU sorting-facility residual reports.
 
 ---
 
