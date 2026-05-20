@@ -3,7 +3,7 @@
 > Interactive platform that gathers, computes and visualizes air, water and recycling quality data across the municipalities of Thessaloniki, Greece — turning scattered public data into clear, comparable indices that anyone can understand.
 
 🔗 **Live Demo:** [thessinfo.vercel.app](https://thessinfo.vercel.app)
-📦 **Legacy v1:** [users.it.teithe.gr/~iliasalt/ThessInfo](https://users.it.teithe.gr/~iliasalt/ThessInfo/)
+📦 **Legacy v1:** [users.it.teithe.gr/~iliasalt/ThessInfo](https://users.it.teithe.gr/~iliasalt/ThessInfo/) & legacy code on https://github.com/Retsos/ThessInfo
 
 ---
 
@@ -335,26 +335,6 @@ ThessInfo/
     │   └── quality-indexes.ts # band definitions
     └── components/ui/         # shadcn primitives
 ```
-
----
-
-## 🛣️ Roadmap
-
-The architecture is designed for extensibility — turning ThessInfo from a static
-information tool into a complete *Environmental Observatory*. Planned extensions:
-
-- 📡 **Real-time IoT data** — Integration with city sensor networks via WebSockets / MQTT
-  for live AQI updates per minute, instead of historical aggregation.
-- 🤖 **Predictive analytics** — Time-series regression on historical data to forecast
-  air & water quality for the next 48 hours, factoring in weather and traffic patterns.
-- 🌐 **New environmental metrics** — Extend the EQI framework with noise pollution,
-  EMF radiation, and traffic load — moving toward a holistic *Smart City Dashboard*.
-- 📱 **Mobile PWA + push notifications** — Native-grade experience with alerts when
-  pollutants in a geofenced area exceed WHO safety thresholds.
-- 🇬🇷 **Multi-tenancy** — Parameterize the platform to support multiple Greek cities
-  (Athens, Larissa, …) for cross-municipality benchmarking at national scale.
-
----
 
 ## 🤝 Contributing
 
