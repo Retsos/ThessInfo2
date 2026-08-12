@@ -3,7 +3,12 @@
 > Interactive platform that gathers, computes and visualizes air, water and recycling quality data across the municipalities of Thessaloniki, Greece — turning scattered public data into clear, comparable indices that anyone can understand.
 
 🔗 **Live Demo:** [thessinfo.vercel.app](https://thessinfo.vercel.app)
+
+<img width="1640" height="908" alt="thessinfo2" src="https://github.com/user-attachments/assets/994cb8b3-515f-4a56-b407-7a6e4a1606d1" />
+
 📦 **Legacy v1:** [users.it.teithe.gr/~iliasalt/ThessInfo](https://users.it.teithe.gr/~iliasalt/ThessInfo/) & legacy code on https://github.com/Retsos/ThessInfo
+
+<img width="1895" height="901" alt="thessinfo" src="https://github.com/user-attachments/assets/d4304ece-5f3c-435e-98c8-ecf3fb2cb5e3" />
 
 ---
 
